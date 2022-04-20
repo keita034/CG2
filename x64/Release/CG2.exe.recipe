@@ -5,7 +5,14 @@
       <FullPath>C:\k021g1266\CG2\CG2\x64\Release\CG2.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
-  <ContentFiles />
+  <ContentFiles>
+    <ContentFile>
+      <FullPath>C:\k021g1266\CG2\CG2\x64\Release\BasicPS.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\k021g1266\CG2\CG2\x64\Release\BasicVS.cso</FullPath>
+    </ContentFile>
+  </ContentFiles>
   <SatelliteDlls />
   <NonRecipeFileRefs />
 </Project>

@@ -6,13 +6,18 @@
 #include<string>
 #include<DirectXMath.h>
 #include <d3dcompiler.h>
+#include<dinput.h>
 
 #pragma comment(lib, "d3dcompiler.lib")
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
+#pragma comment(lib,"dinput8.lib")
+#pragma comment(lib,"dxguid.lib")
 
 using namespace std;
 using namespace DirectX;
+
+//#define DIRECTINPUT_VERSION	0x0800 //DirectInputのバージョン指定
 
 //ウィンドウプロシージャ
 LRESULT WincowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
@@ -189,10 +194,33 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 	UINT64 fenceVal = 0;
 	result = device->CreateFence(fenceVal, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
 
+	//DirectInputの初期化
+	IDirectInput8* directInput = nullptr;
+	result = DirectInput8Create(w.hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&directInput, nullptr);
+	assert(SUCCEEDED(result));
+
+	//キーボードデバイスの生成
+	IDirectInputDevice8* keyboard = nullptr;
+	result = directInput->CreateDevice(GUID_SysKeyboard,&keyboard,NULL);
+	assert(SUCCEEDED(result));
+
+	//入力データ形式のセット
+	result = keyboard->SetDataFormat(&c_dfDIKeyboard);//標準形式
+	assert(SUCCEEDED(result));
+
+	//排他制御レベルのセット
+	result = keyboard->SetCooperativeLevel(hwnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
+	//DISCL_FOREGROUND		画面が手前にある場合のみ入力を受け付ける
+	//DISCL_NONEXCLUSIVE	デバイスをこのアプリだけで専有しない
+	//DISCL_NOWINKEY		Windowキーを無効にする
+	assert(SUCCEEDED(result));
+
+
+
 #pragma endregion
 
 #pragma region 描画初期化処理
-	
+
 	// 頂点データ
 	XMFLOAT3 vertices[] = {
 	 { -0.5f, -0.5f, 0.0f }, // 左下
@@ -325,7 +353,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 	pipelineDesc.RasterizerState.DepthClipEnable = true; // 深度クリッピングを有効に
 
 	// ブレンドステート
-	pipelineDesc.BlendState.RenderTarget[0].RenderTargetWriteMask= D3D12_COLOR_WRITE_ENABLE_ALL; // RBGA全てのチャンネルを描画
+	pipelineDesc.BlendState.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL; // RBGA全てのチャンネルを描画
 
 	// 頂点レイアウトの設定
 	pipelineDesc.InputLayout.pInputElementDescs = inputLayout;
@@ -363,8 +391,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 
 #pragma endregion
 
-
-
 	while (true)
 	{
 #pragma region ウィンドウメッセージ処理
@@ -386,6 +412,14 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 
 #pragma region 毎フレーム処理
 
+		//キーボード情報の取得開始
+		keyboard->Acquire();
+
+		//全キー入力状態を取得する
+		BYTE key[256] = {};
+		keyboard->GetDeviceState(sizeof(key), key);
+
+
 		//1バックバッファ番号を取得
 		UINT bbIndex = swapChain->GetCurrentBackBufferIndex();
 		//書き込み可能に変更
@@ -403,6 +437,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 		//3画面クリア
 		FLOAT clearColor[] = { 0.1f,0.25f,0.5f,0.0f };
 		cmmandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+
+
 
 #pragma region グラフィックスコマンド
 
@@ -426,11 +462,11 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 
 		// シザー矩形設定コマンドを、コマンドリストに積む
 		cmmandList->RSSetScissorRects(1, &scissorRect);
-		
+
 		// パイプラインステートとルートシグネチャの設定コマンド
 		cmmandList->SetPipelineState(pipelineState);
 		cmmandList->SetGraphicsRootSignature(rootSignature);
-		
+
 		// プリミティブ形状の設定コマンド
 		cmmandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); // 三角形リスト
 
