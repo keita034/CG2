@@ -2,15 +2,15 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>C:\k021g1266\CG2\CG2\x64\Release\CG2.exe</FullPath>
+      <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Release\CG2.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles>
     <ContentFile>
-      <FullPath>C:\k021g1266\CG2\CG2\x64\Release\BasicPS.cso</FullPath>
+      <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Release\BasicPS.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>C:\k021g1266\CG2\CG2\x64\Release\BasicVS.cso</FullPath>
+      <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Release\BasicVS.cso</FullPath>
     </ContentFile>
   </ContentFiles>
   <SatelliteDlls />
