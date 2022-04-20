@@ -201,7 +201,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 
 	//キーボードデバイスの生成
 	IDirectInputDevice8* keyboard = nullptr;
-	result = directInput->CreateDevice(GUID_SysKeyboard,&keyboard,NULL);
+	result = directInput->CreateDevice(GUID_SysKeyboard, &keyboard, NULL);
 	assert(SUCCEEDED(result));
 
 	//入力データ形式のセット
@@ -436,9 +436,17 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 
 		//3画面クリア
 		FLOAT clearColor[] = { 0.1f,0.25f,0.5f,0.0f };
+
+		if (key[DIK_SPACE])     // スペースキーが押されていたら
+		{
+			clearColor[0] = 0.8941f;
+			clearColor[1] = 0.0f;
+			clearColor[2] = 0.498;
+			clearColor[3] = 0.0f;
+		}
+
+
 		cmmandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
-
-
 
 #pragma region グラフィックスコマンド
 
