@@ -141,6 +141,7 @@
   <ItemGroup>
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="WinApi.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="BasicPS.hlsl">
@@ -160,6 +161,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Input.h" />
+    <ClInclude Include="WinApi.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -17,62 +17,22 @@
 using namespace std;
 using namespace DirectX;
 
+#include"Input.h"
+#include"WinApi.h"
+
 //#define DIRECTINPUT_VERSION	0x0800 //DirectInputのバージョン指定
 
-//ウィンドウプロシージャ
-LRESULT WincowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
-{
-	switch (msg)
-	{
-	case WM_DESTROY://ウィンドウが破棄
-
-		PostQuitMessage(0);//OSに終了を伝える
-		return 0;
-	}
-
-	//標準の処理を行う
-	return DefWindowProc(hwnd, msg, wparam, lparam);
-}
 
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 {
 
 #pragma region windowAPI
 
-	//ウィンドウサイズ
-	const int window_widht = 1200;
-	const int window_height = 720;
+	WinApi* win = nullptr;
 
-	//ウィンドウクラス生成
-	WNDCLASSEX w{};
-	w.cbSize = sizeof(WNDCLASSEX);
-	w.lpfnWndProc = (WNDPROC)WincowProc;//ウィンドウプロシージャを設定
-	w.lpszClassName = L"DirectXGame";//クラス名
-	w.hInstance = GetModuleHandle(nullptr);//ハンドル
-	w.hCursor = LoadCursor(NULL, IDC_ARROW);//カーソル設定
+	win = win->GetInstance();
 
-	//クラスを登録
-	RegisterClassEx(&w);
-	//X,Y座標,縦,横幅
-	RECT wrc = { 0,0,window_widht,window_height };
-	//サイズ補正
-	AdjustWindowRect(&wrc, WS_OVERLAPPEDWINDOW, false);
-
-	//ウィンドウオブジェクトの生成
-	HWND hwnd = CreateWindow(
-		w.lpszClassName,//クラス名指定
-		L"DirectXGame",//タイトルバーの文字
-		WS_OVERLAPPEDWINDOW,//タイトルバーと境界線があるウィンドウです
-		CW_USEDEFAULT,//表示X座標はOSにお任せします
-		CW_USEDEFAULT,//表示Y座標はOSにお任せします
-		wrc.right - wrc.left,//ウィンドウ幅
-		wrc.bottom - wrc.top,//ウィンドウ高
-		nullptr,//親ウィンドウハンドル
-		nullptr,//メニューハンドル
-		w.hInstance,//呼び出しアプリケーションハンドル
-		nullptr);//追加パラメータ
-
-	ShowWindow(hwnd, SW_SHOW);//ウィンドウ表示
+	win->CreateGameWindow();
 
 	MSG msg{};
 
@@ -96,6 +56,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 	ID3D12GraphicsCommandList* cmmandList = nullptr;
 	ID3D12CommandQueue* cmmandQueue = nullptr;
 	ID3D12DescriptorHeap* rtvHeap = nullptr;
+
+	Input input_;
 
 	//DXGIファクトリー
 	result = CreateDXGIFactory(IID_PPV_ARGS(&dxgiFactory));
@@ -138,8 +100,17 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 	assert(SUCCEEDED(result));
 
 	//コマンドリストを生成
-	result = device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAllocator, nullptr, IID_PPV_ARGS(&cmmandList));
-	assert(SUCCEEDED(result));
+	if (cmdAllocator != 0)
+	{
+		result = device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAllocator, nullptr, IID_PPV_ARGS(&cmmandList));
+		assert(SUCCEEDED(result));
+	}
+	else
+	{
+		assert(SUCCEEDED(0));
+	}
+
+	
 
 	//コマンドキューの設定＆生成
 	D3D12_COMMAND_QUEUE_DESC cmmandQueueDesc{};
@@ -157,8 +128,16 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;//フリップ後は破棄
 	swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 	//生成
-	result = dxgiFactory->CreateSwapChainForHwnd(cmmandQueue, hwnd, &swapChainDesc, nullptr, nullptr, (IDXGISwapChain1**)&swapChain);
-	assert(SUCCEEDED(result));
+	if (cmmandQueue != 0)
+	{
+		result = dxgiFactory->CreateSwapChainForHwnd(cmmandQueue, win->GetHwnd(), &swapChainDesc, nullptr, nullptr, (IDXGISwapChain1**)&swapChain);
+		assert(SUCCEEDED(result));
+	}
+	else
+	{
+		assert(SUCCEEDED(0));
+	}
+
 
 	//デスクリプタヒープの設定
 	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc{};
@@ -194,28 +173,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 	UINT64 fenceVal = 0;
 	result = device->CreateFence(fenceVal, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
 
-	//DirectInputの初期化
-	IDirectInput8* directInput = nullptr;
-	result = DirectInput8Create(w.hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&directInput, nullptr);
-	assert(SUCCEEDED(result));
-	
-	//キーボードデバイスの生成
-	IDirectInputDevice8* keyboard = nullptr;
-	result = directInput->CreateDevice(GUID_SysKeyboard, &keyboard, NULL);
-	assert(SUCCEEDED(result));
-
-	//入力データ形式のセット
-	result = keyboard->SetDataFormat(&c_dfDIKeyboard);//標準形式
-	assert(SUCCEEDED(result));
-
-	//排他制御レベルのセット
-	result = keyboard->SetCooperativeLevel(hwnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
-	//DISCL_FOREGROUND		画面が手前にある場合のみ入力を受け付ける
-	//DISCL_NONEXCLUSIVE	デバイスをこのアプリだけで専有しない
-	//DISCL_NOWINKEY		Windowキーを無効にする
-	assert(SUCCEEDED(result));
-
-
+	input_.Initialize();
 
 #pragma endregion
 
@@ -434,7 +392,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 	pipelineDesc[0].pRootSignature = rootSignature;
 
 	// パイプランステートの生成
-	ID3D12PipelineState* pipelineState[2];
+	ID3D12PipelineState* pipelineState[2] = {};
 	result = device->CreateGraphicsPipelineState(&pipelineDesc[0], IID_PPV_ARGS(&pipelineState[0]));
 	assert(SUCCEEDED(result));
 
@@ -484,9 +442,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 	bool TransformFlag = false;
 	bool FillModeFlag = true;
 
-	bool TriggerFlag1 = false;
-	bool TriggerFlag2 = false;
-
 	while (true)
 	{
 #pragma region ウィンドウメッセージ処理
@@ -508,13 +463,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 
 #pragma region 毎フレーム処理
 
-		//キーボード情報の取得開始
-		keyboard->Acquire();
 
-		//全キー入力状態を取得する
-		BYTE key[256] = {};
-		keyboard->GetDeviceState(sizeof(key), key);
-
+		input_.Update();
 
 		//1バックバッファ番号を取得
 		UINT bbIndex = swapChain->GetCurrentBackBufferIndex();
@@ -532,11 +482,11 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 
 		//3画面クリア
 		FLOAT clearColor[] = { 0.1f,0.25f,0.5f,0.0f };
-		if (key[DIK_SPACE])
+		if (input_.PushKey(DIK_SPACE))
 		{
 			clearColor[0] = 0.8941f;
 			clearColor[1] = 0.0f;
-			clearColor[2] = 0.498;
+			clearColor[2] = 0.498f;
 			clearColor[3] = 0.0f;
 		}
 
@@ -589,13 +539,20 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 		cmmandList->RSSetScissorRects(1, &scissorRect);
 
 		// パイプラインステートとルートシグネチャの設定コマンド
-		if (FillModeFlag)
+		if (FillModeFlag )
 		{
-			cmmandList->SetPipelineState(pipelineState[0]);
+			if (pipelineState[0]!=0)
+			{
+				cmmandList->SetPipelineState(pipelineState[0]);
+
+			}
 		}
 		else
 		{
-			cmmandList->SetPipelineState(pipelineState[1]);
+			if (pipelineState[1] != 0)
+			{
+				cmmandList->SetPipelineState(pipelineState[1]);
+			}
 		}
 		cmmandList->SetGraphicsRootSignature(rootSignature);
 
@@ -614,7 +571,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 		}
 
 		//三角形から四角
-		if (key[DIK_1] && !TriggerFlag1)
+		if (input_.TriggerKey(DIK_1))
 		{
 			if (TransformFlag)
 			{
@@ -624,15 +581,10 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 			{
 				TransformFlag = true;
 			}
-			TriggerFlag1 = true;
-		}
-		else if(!key[DIK_1])
-		{
-			TriggerFlag1 = false;
 		}
 
 		//フィルモード変更
-		if (key[DIK_2] && !TriggerFlag2)
+		if (input_.TriggerKey(DIK_2))
 		{
 			if (FillModeFlag)
 			{
@@ -642,11 +594,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 			{
 				FillModeFlag = true;
 			}
-			TriggerFlag2 = true;
-		}
-		else if (!key[DIK_2])
-		{
-			TriggerFlag2 = false;
 		}
 
 		if (TransformFlag)
@@ -698,14 +645,21 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 		result = cmdAllocator->Reset();
 		assert(SUCCEEDED(result));
 		//コマンドリストを貯める準備
-		result = cmmandList->Reset(cmdAllocator, nullptr);
-		assert(SUCCEEDED(result));
+		if (cmmandList != 0)
+		{
+			result = cmmandList->Reset(cmdAllocator, nullptr);
+			assert(SUCCEEDED(result));
+		}
+		else
+		{
+			assert(SUCCEEDED(0));
+		}
+
 
 #pragma endregion
 	}
 
-	//クラス使用しないため登録解除
-	UnregisterClass(w.lpszClassName, w.hInstance);
+	win->Destroy();
 
 	return 0;
 }
