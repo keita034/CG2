@@ -224,17 +224,28 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 	// 頂点データ
 	XMFLOAT3 vertices[] =
 	{
-		{ -0.5f, -0.5f, 0.0f }, // 左下　インデックス0
-		{ -0.5f, +0.5f, 0.0f }, // 左上　インデックス1
-		{ +0.5f, -0.5f, 0.0f }, // 右下　インデックス2
-		{ +0.5f, +0.5f, 0.0f }, // 右上　インデックス3
+		{ -0.4f, +0.5f, 0.0f },//左上インデックス0
+		{ -0.4f, 0.0f, 0.0f },//左中インデックス1
+		{ -0.4f, -0.5f, 0.0f },// 左下インデックス2
+
+		{ +0.4f, +0.5f, 0.0f },//右上インデックス3
+		{ +0.4f, 0.0f, 0.0f },//右中インデックス4
+		{ +0.4f, -0.5f, 0.0f },//右下インデックス5
+
+
 	};
 
 	// インデックスデータ
 	uint16_t indices[] =
 	{
-		0,1,2,// 三角形1つ目
-		1,2,3,// 三角形2つ目
+		0,4,
+		4,2,
+		2,5,
+		5,1,
+		1,3,
+		3,0,
+		4,1
+
 	};
 
 	// 頂点データ全体のサイズ = 頂点データ一つ分のサイズ * 頂点データの要素数
@@ -442,7 +453,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 	pipelineDesc.InputLayout.pInputElementDescs = inputLayout;
 
 	// 図形の形状設定
-	pipelineDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	pipelineDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
+	//D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE
+	//D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE
 
 	// その他の設定
 	pipelineDesc.NumRenderTargets = 1; // 描画対象は1つ
@@ -555,7 +568,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 		commandList->SetGraphicsRootSignature(rootSignature);
 
 		// プリミティブ形状の設定コマンド
-		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); //三角形リスト
+		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST); //三角形リスト
+		//D3D_PRIMITIVE_TOPOLOGY_LINELIST
+		//D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST
 
 		// 頂点バッファビューの設定コマンド
 		commandList->IASetVertexBuffers(0, 1, &vbView);
