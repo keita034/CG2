@@ -208,7 +208,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 	assert(SUCCEEDED(result));
 
 	//値を書き込むと自動的に転送される
-	constMapMaterial->color = XMFLOAT4(1, 0, 0, 0.5f);
+	constMapMaterial->color = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
 
 	//ルートパラメータの設定
 	D3D12_ROOT_PARAMETER rootParam = {};
@@ -417,20 +417,20 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 	blenddesc.SrcBlendAlpha = D3D12_BLEND_ONE;//ソースの値を100%使う
 	blenddesc.DestBlendAlpha = D3D12_BLEND_ZERO;//テストの値を0%使う
 
-	// 加算合成
-	blenddesc.BlendOp = D3D12_BLEND_OP_ADD;// 加算
-	blenddesc.SrcBlend = D3D12_BLEND_ONE;// ソースの値を100% 使う
-	blenddesc.DestBlend = D3D12_BLEND_ONE;// デストの値を100% 使う
+	//// 加算合成
+	//blenddesc.BlendOp = D3D12_BLEND_OP_ADD;// 加算
+	//blenddesc.SrcBlend = D3D12_BLEND_ONE;// ソースの値を100% 使う
+	//blenddesc.DestBlend = D3D12_BLEND_ONE;// デストの値を100% 使う
 
-	// 減算合成
-	blenddesc.BlendOp = D3D12_BLEND_OP_REV_SUBTRACT;// デストからソースを減算
-	blenddesc.SrcBlend = D3D12_BLEND_ONE;// ソースの値を100% 使う
-	blenddesc.DestBlend = D3D12_BLEND_ONE;// デストの値を100% 使う
+	//// 減算合成
+	//blenddesc.BlendOp = D3D12_BLEND_OP_REV_SUBTRACT;// デストからソースを減算
+	//blenddesc.SrcBlend = D3D12_BLEND_ONE;// ソースの値を100% 使う
+	//blenddesc.DestBlend = D3D12_BLEND_ONE;// デストの値を100% 使う
 
-	// 色反転
-	blenddesc.BlendOp = D3D12_BLEND_OP_ADD;// 加算
-	blenddesc.SrcBlend = D3D12_BLEND_INV_DEST_COLOR;// 1.0f-デストカラーの値
-	blenddesc.DestBlend = D3D12_BLEND_ZERO;// 使わない
+	//// 色反転
+	//blenddesc.BlendOp = D3D12_BLEND_OP_ADD;// 加算
+	//blenddesc.SrcBlend = D3D12_BLEND_INV_DEST_COLOR;// 1.0f-デストカラーの値
+	//blenddesc.DestBlend = D3D12_BLEND_ZERO;// 使わない
 
 	// 半透明合成
 	blenddesc.BlendOp = D3D12_BLEND_OP_ADD;// 加算
@@ -476,6 +476,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 
 #pragma endregion
 
+	//変数
+	float frame = 0.0f;
 #pragma endregion
 
 	while (true)
@@ -499,6 +501,15 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 
 #pragma region 毎フレーム処理
 
+		frame += 0.001;
+
+		if (frame > 1.0f)
+		{
+			frame = 0.0f;
+		}
+
+		//値を書き込むと自動的に転送される
+		constMapMaterial->color = XMFLOAT4(1.0f - frame, 0.0f, 0.0f + frame, 1.0f);
 
 		input_.Update();
 
@@ -551,7 +562,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 		// パイプラインステートとルートシグネチャの設定コマンド
 
 		commandList->SetPipelineState(pipelineState);
-
 		commandList->SetGraphicsRootSignature(rootSignature);
 
 		// プリミティブ形状の設定コマンド
