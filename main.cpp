@@ -20,12 +20,14 @@ using namespace DirectX;
 #include"Input.h"
 #include"WinApi.h"
 
-//#define DIRECTINPUT_VERSION	0x0800 //DirectInputのバージョン指定
+#define DIRECTINPUT_VERSION	0x0800 //DirectInputのバージョン指定
 
 // 定数バッファ用データ構造体（マテリアル）
 struct ConstBfferDateMaterial
 {
 	XMFLOAT4 color;//色(RGBA)
+
+	XMFLOAT3 pos;
 };
 
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
@@ -191,6 +193,19 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 	cbResourceDesc.SampleDesc.Count = 1;
 	cbResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 
+	//ルートパラメータの設定
+	D3D12_ROOT_PARAMETER rootParam = {};
+	rootParam.ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	rootParam.Descriptor.ShaderRegister = 0;
+	rootParam.Descriptor.RegisterSpace = 0;
+	rootParam.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+#pragma endregion
+
+#pragma region 描画初期化処理
+
+#pragma region 頂点関連
+
 	ID3D12Resource* constBfferMaterial = nullptr;
 	// 定数バッファの生成
 	result = device->CreateCommittedResource(
@@ -208,26 +223,14 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 	assert(SUCCEEDED(result));
 
 	//値を書き込むと自動的に転送される
-	constMapMaterial->color = XMFLOAT4(1, 0, 0, 0.5f);
-
-	//ルートパラメータの設定
-	D3D12_ROOT_PARAMETER rootParam = {};
-	rootParam.ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	rootParam.Descriptor.ShaderRegister = 0;
-	rootParam.Descriptor.RegisterSpace = 0;
-	rootParam.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-#pragma endregion
-
-#pragma region 描画初期化処理
-
-#pragma region 頂点関連
+	constMapMaterial->color = XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f);
 	// 頂点データ
 	XMFLOAT3 vertices[] =
 	{
-		{ -0.5f, -0.5f, 0.0f }, // 左下　インデックス0
-		{ -0.5f, +0.5f, 0.0f }, // 左上　インデックス1
-		{ +0.5f, -0.5f, 0.0f }, // 右下　インデックス2
-		{ +0.5f, +0.5f, 0.0f }, // 右上　インデックス3
+		{ -0.5f, -0.5f, 0.0f },//左下インデックス0
+		{ -0.5f, +0.5f, 0.0f },//左上インデックス1
+		{ +0.5f, -0.5f, 0.0f },//右下インデックス2
+		{ +0.5f, +0.5f, 0.0f },//右上インデックス3
 	};
 
 	// インデックスデータ
@@ -271,7 +274,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 	// 全頂点に対して
 	for (int i = 0; i < _countof(vertices); i++)
 	{
-		vertMap[i] = vertices[i]; // 座標をコピー
+		vertMap[i] = vertices[i];//座標をコピー
 	}
 	// 繋がりを解除
 	vertBuff->Unmap(0, nullptr);
@@ -417,20 +420,20 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 	blenddesc.SrcBlendAlpha = D3D12_BLEND_ONE;//ソースの値を100%使う
 	blenddesc.DestBlendAlpha = D3D12_BLEND_ZERO;//テストの値を0%使う
 
-	// 加算合成
-	blenddesc.BlendOp = D3D12_BLEND_OP_ADD;// 加算
-	blenddesc.SrcBlend = D3D12_BLEND_ONE;// ソースの値を100% 使う
-	blenddesc.DestBlend = D3D12_BLEND_ONE;// デストの値を100% 使う
+	//// 加算合成
+	//blenddesc.BlendOp = D3D12_BLEND_OP_ADD;// 加算
+	//blenddesc.SrcBlend = D3D12_BLEND_ONE;// ソースの値を100% 使う
+	//blenddesc.DestBlend = D3D12_BLEND_ONE;// デストの値を100% 使う
 
-	// 減算合成
-	blenddesc.BlendOp = D3D12_BLEND_OP_REV_SUBTRACT;// デストからソースを減算
-	blenddesc.SrcBlend = D3D12_BLEND_ONE;// ソースの値を100% 使う
-	blenddesc.DestBlend = D3D12_BLEND_ONE;// デストの値を100% 使う
+	//// 減算合成
+	//blenddesc.BlendOp = D3D12_BLEND_OP_REV_SUBTRACT;// デストからソースを減算
+	//blenddesc.SrcBlend = D3D12_BLEND_ONE;// ソースの値を100% 使う
+	//blenddesc.DestBlend = D3D12_BLEND_ONE;// デストの値を100% 使う
 
-	// 色反転
-	blenddesc.BlendOp = D3D12_BLEND_OP_ADD;// 加算
-	blenddesc.SrcBlend = D3D12_BLEND_INV_DEST_COLOR;// 1.0f-デストカラーの値
-	blenddesc.DestBlend = D3D12_BLEND_ZERO;// 使わない
+	//// 色反転
+	//blenddesc.BlendOp = D3D12_BLEND_OP_ADD;// 加算
+	//blenddesc.SrcBlend = D3D12_BLEND_INV_DEST_COLOR;// 1.0f-デストカラーの値
+	//blenddesc.DestBlend = D3D12_BLEND_ZERO;// 使わない
 
 	// 半透明合成
 	blenddesc.BlendOp = D3D12_BLEND_OP_ADD;// 加算
@@ -443,6 +446,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 
 	// 図形の形状設定
 	pipelineDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	//D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE
+	//D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE
 
 	// その他の設定
 	pipelineDesc.NumRenderTargets = 1; // 描画対象は1つ
@@ -556,6 +561,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 
 		// プリミティブ形状の設定コマンド
 		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); //三角形リスト
+		//D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST
+		//D3D_PRIMITIVE_TOPOLOGY_LINELIST
 
 		// 頂点バッファビューの設定コマンド
 		commandList->IASetVertexBuffers(0, 1, &vbView);
