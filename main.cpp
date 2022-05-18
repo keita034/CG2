@@ -20,14 +20,80 @@ using namespace DirectX;
 #include"Input.h"
 #include"WinApi.h"
 
-#define DIRECTINPUT_VERSION	0x0800 //DirectInputのバージョン指定
+//#define DIRECTINPUT_VERSION	0x0800 //DirectInputのバージョン指定
+
+void AffineTransformation2D(XMFLOAT3*& position, int posnum, XMFLOAT2& translation, float rotate, XMFLOAT2& scale)
+{
+
+	XMFLOAT2 OriginPosition = {};
+
+	XMFLOAT2 TmpPosition = {};
+
+	OriginPosition.x = position[0].x;
+	OriginPosition.y = position[0].y;
+
+	//縮小拡大
+	for (int i = 0; i < posnum; i++)
+	{
+		//原点へ
+		position[i].x = 1.0f * position[i].x + 0.0f * position[i].y + -OriginPosition.x * position[i].z;
+		position[i].y = 0.0f * position[i].x + 1.0f * position[i].y + -OriginPosition.y * position[i].z;
+		position[i].z = 0.0f * position[i].x + 0.0f * position[i].y + 1.0f * position[i].z;
+
+		TmpPosition.x = position[i].x;
+		TmpPosition.y = position[i].y;
+
+		//拡大
+		position[i].x = TmpPosition.x * scale.x + TmpPosition.y * 0.0f + 0.0f * position[i].z;
+		position[i].y = TmpPosition.x * 0.0f + TmpPosition.y * scale.y + 0.0f * position[i].z;
+		position[i].z = TmpPosition.x * 0.0f + TmpPosition.y * 0.0f + 1.0f * position[i].z;
+
+		//戻す
+		position[i].x = 1.0f * position[i].x + 0.0f * position[i].y + OriginPosition.x * position[i].z;
+		position[i].y = 0.0f * position[i].x + 1.0f * position[i].y + OriginPosition.y * position[i].z;
+		position[i].z = 0.0f * position[i].x + 0.0f * position[i].y + 1.0f * position[i].z;
+	}
+
+	OriginPosition.x = position[0].x;
+	OriginPosition.y = position[0].y;
+
+	//回転
+	//行列計算
+	for (int i = 0; i < posnum; i++)
+	{
+
+		//原点へ
+		position[i].x = 1.0f * position[i].x + 0.0f * position[i].y + -OriginPosition.x * position[i].z;
+		position[i].y = 0.0f * position[i].x + 1.0f * position[i].y + -OriginPosition.y * position[i].z;
+		position[i].z = 0.0f * position[i].x + 0.0f * position[i].y + 1.0f * position[i].z;
+
+		TmpPosition.x = position[i].x;
+		TmpPosition.y = position[i].y;
+
+		//回転
+		position[i].x = TmpPosition.x * cosf(rotate) + TmpPosition.y * -sinf(rotate) + 0.0f * position[i].z;
+		position[i].y = TmpPosition.x * sinf(rotate) + TmpPosition.y * cosf(rotate) + 0.0f * position[i].z;
+		position[i].z = TmpPosition.x * 0.0f + 0.0f * TmpPosition.y + 1.0f * position[i].z;
+
+		//戻す
+		position[i].x = 1.0f * position[i].x + 0.0f * position[i].y + OriginPosition.x * position[i].z;
+		position[i].y = 0.0f * position[i].x + 1.0f * position[i].y + OriginPosition.y * position[i].z;
+		position[i].z = 0.0f * position[i].x + 0.0f * position[i].y + 1.0f * position[i].z;
+	}
+
+	//平行移動
+	for (int i = 0; i < posnum; i++)
+	{
+		position[i].x = 1.0f * position[i].x + 0.0f * position[i].y + translation.x * position[i].z;
+		position[i].y = 0.0f * position[i].x + 1.0f * position[i].y + translation.y * position[i].z;
+		position[i].z = 0.0f * position[i].x + 0.0f * position[i].y + 1.0f * position[i].z;
+	}
+}
 
 // 定数バッファ用データ構造体（マテリアル）
 struct ConstBfferDateMaterial
 {
 	XMFLOAT4 color;//色(RGBA)
-
-	XMFLOAT3 pos;
 };
 
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
@@ -41,12 +107,11 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 
 	win->CreateGameWindow();
 
-	MSG msg{};
-
 #pragma endregion
 
 #pragma region DirectX初期化
 
+	
 #ifdef _DEBUG
 	ID3D12Debug* debugController;
 	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController))))
@@ -224,13 +289,14 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 
 	//値を書き込むと自動的に転送される
 	constMapMaterial->color = XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f);
+
 	// 頂点データ
 	XMFLOAT3 vertices[] =
 	{
-		{ -0.5f, -0.5f, 0.0f },//左下インデックス0
-		{ -0.5f, +0.5f, 0.0f },//左上インデックス1
-		{ +0.5f, -0.5f, 0.0f },//右下インデックス2
-		{ +0.5f, +0.5f, 0.0f },//右上インデックス3
+		{ -0.5f, -0.5f, 1.0f },//左下インデックス0
+		{ -0.5f, +0.5f, 1.0f },//左上インデックス1
+		{ +0.5f, -0.5f, 1.0f },//右下インデックス2
+		{ +0.5f, +0.5f, 1.0f },//右上インデックス3
 	};
 
 	// インデックスデータ
@@ -464,11 +530,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 
 	// ルートシグネチャのシリアライズ
 	ID3DBlob* rootSigBlob = nullptr;
-	result = D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1_0,
-		&rootSigBlob, &errorBlob);
+	result = D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1_0, &rootSigBlob, &errorBlob);
 	assert(SUCCEEDED(result));
-	result = device->CreateRootSignature(0, rootSigBlob->GetBufferPointer(), rootSigBlob->GetBufferSize(),
-		IID_PPV_ARGS(&rootSignature));
+	result = device->CreateRootSignature(0, rootSigBlob->GetBufferPointer(), rootSigBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
 	assert(SUCCEEDED(result));
 	rootSigBlob->Release();
 	// パイプラインにルートシグネチャをセット
@@ -487,15 +551,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 	{
 #pragma region ウィンドウメッセージ処理
 
-		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
-		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-
-		}
-
-		//もうアプリケーションが終わるって時にmessageがWM_QUITになる
-		if (msg.message == WM_QUIT)
+		if (win->WindowMessage())
 		{
 			break;
 		}
@@ -503,7 +559,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 #pragma endregion
 
 #pragma region 毎フレーム処理
-
 
 		input_.Update();
 
@@ -555,7 +610,10 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 
 		// パイプラインステートとルートシグネチャの設定コマンド
 
-		commandList->SetPipelineState(pipelineState);
+		if (pipelineState!= 0)
+		{
+			commandList->SetPipelineState(pipelineState);
+		}
 
 		commandList->SetGraphicsRootSignature(rootSignature);
 
@@ -573,9 +631,73 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 		//インデックスバッファビューの設定コマンド
 		commandList->IASetIndexBuffer(&ibView);
 
+		XMFLOAT2 trnsMove  = {0.0f,0.0f};
+		float rotaMove = 0.0f;
+		XMFLOAT2 scalMove = { 1.0f,1.0f};
+
+		//移動
+		if (input_.PushKey(DIK_W))
+		{
+			//上
+			trnsMove.y += 0.01f;
+		}
+		if (input_.PushKey(DIK_S))
+		{
+			//下
+			trnsMove.y -= 0.01f;
+		}
+		if (input_.PushKey(DIK_D))
+		{
+			//右
+			trnsMove.x += 0.01f;
+		}
+		if (input_.PushKey(DIK_A))
+		{
+			//左
+			trnsMove.x -= 0.01f;
+		}
+		
+		//回転
+		if (input_.PushKey(DIK_LEFT))
+		{
+			//左回り
+			rotaMove += 0.01f;
+		}
+		if (input_.PushKey(DIK_RIGHT))
+		{
+			//右回り
+			rotaMove -= 0.01f;
+		}
+
+		//拡大縮小
+		if (input_.PushKey(DIK_Z))
+		{
+			//横拡大
+			scalMove.x += 0.01f;
+		}
+		if (input_.PushKey(DIK_X))
+		{
+			//横縮小
+			scalMove.x -= 0.01f;
+		}
+
+		if (input_.PushKey(DIK_C))
+		{
+			//縦拡大
+			scalMove.y += 0.01f;
+		}
+		if (input_.PushKey(DIK_V))
+		{
+			//縦縮小
+			scalMove.y -= 0.01f;
+		}
+
+		SYSTEMTIME lpSystemTime;
+		GetSystemTime(&lpSystemTime);
+
+		AffineTransformation2D(vertMap, _countof(vertices), trnsMove, rotaMove, scalMove);
 		// 描画コマンド
 		commandList->DrawIndexedInstanced(_countof(indices), 1, 0, 0, 0); //全ての頂点を使って描画
-
 
 #pragma endregion
 

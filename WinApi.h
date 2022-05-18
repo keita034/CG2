@@ -31,6 +31,8 @@ public:
 
 	 void Destroy();
 
+	 bool WindowMessage();
+
 private:
 
 	static HWND hwnd;   // ウィンドウハンドル
@@ -38,6 +40,7 @@ private:
 	UINT msg;
 	WPARAM wparam;
 	LPARAM lparam;
+	
 
 	static WinApi* WinApi_;
 
