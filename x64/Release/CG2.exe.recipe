@@ -13,10 +13,10 @@
       <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Release\BasicVS.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Release\ShapePS.cso</FullPath>
+      <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Release\MeshPS.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Release\ShapeVS.cso</FullPath>
+      <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Release\MeshVS.cso</FullPath>
     </ContentFile>
   </ContentFiles>
   <SatelliteDlls />

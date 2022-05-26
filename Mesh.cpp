@@ -1,32 +1,118 @@
-#include "Shape.h"
 #include<string>
+#include<dxgi1_6.h>
+#include <d3dcompiler.h>
+#include "DX12Base.h"
+#include "Mesh.h"
+#include <vector>
+#include <iterator>
 
 using namespace std;
+using namespace DirectX;
 
-HRESULT Shape::ShaderInit()
+void Mesh::CreateBuff()
 {
+	HRESULT result;
 
-	return S_OK;
+	// 頂点データ全体のサイズ = 頂点データ一つ分のサイズ * 頂点データの要素数
+	UINT sizeVB = static_cast<UINT>(sizeof(PosColr) * VertexCount * maxCount);
+
+	// 頂点バッファの設定
+	D3D12_HEAP_PROPERTIES heapProp{}; // ヒープ設定
+	heapProp.Type = D3D12_HEAP_TYPE_UPLOAD; // GPUへの転送用
+	// リソース設定
+	D3D12_RESOURCE_DESC resDesc{};
+	resDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+	resDesc.Width = sizeVB; // 頂点データ全体のサイズ
+	resDesc.Height = 1;
+	resDesc.DepthOrArraySize = 1;
+	resDesc.MipLevels = 1;
+	resDesc.SampleDesc.Count = 1;
+	resDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+
+	// 頂点バッファの生成
+	result = device->CreateCommittedResource(
+		&heapProp, // ヒープ設定
+		D3D12_HEAP_FLAG_NONE,
+		&resDesc, // リソース設定
+		D3D12_RESOURCE_STATE_GENERIC_READ,
+		nullptr,
+		IID_PPV_ARGS(&vertBuff));
+	assert(SUCCEEDED(result));
+
+	// GPU上のバッファに対応した仮想メモリ(メインメモリ上)を取得
+	result = vertBuff->Map(0, nullptr, (void**)&vertMap);
+	assert(SUCCEEDED(result));
+
+	// 頂点バッファビューの作成
+	// GPU仮想アドレス
+	vbView.BufferLocation = vertBuff->GetGPUVirtualAddress();
+	// 頂点バッファのサイズ
+	vbView.SizeInBytes = sizeVB;
+	// 頂点１つ分のデータサイズ
+	vbView.StrideInBytes = sizeof(PosColr);
 }
 
-HRESULT Shape::CreatePipeline(D3D12_PRIMITIVE_TOPOLOGY_TYPE type, BlendMode Mode)
+void Mesh::DrawTriangle(float x1, float y1, float x2, float y2, float x3, float y3, DirectX::XMFLOAT4 colr)
 {
 
-	//シェーダー
+	// 頂点データ
+	vector <PosColr> vertices = {
+	  {{x1, y1, 0.0f}, {colr.x, colr.y, colr.z, colr.w}},
+	  {{x2, y2, 0.0f}, {colr.x, colr.y, colr.z, colr.w}},
+	  {{x3, y3, 0.0f}, {colr.x, colr.y, colr.z, colr.w}},
+	};
+	UINT indxcount = count * VertexCount;
+	copy(vertices.begin(), vertices.end(), &vertMap[indxcount]);
+
+	if (pipelineState != 0)
+	{
+		commandList->SetPipelineState(pipelineState);
+	}
+
+	commandList->SetGraphicsRootSignature(rootSignature);
+
+	// プリミティブ形状の設定コマンド
+	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); //三角形リスト
+
+	// 頂点バッファビューの設定コマンド
+	commandList->IASetVertexBuffers(0, 1, &vbView);
+
+	// 描画コマンド
+	commandList->DrawInstanced(VertexCount, 1, static_cast<INT>(indxcount), 0);
+
+	count++;
+}
+
+void Mesh::DrawTriangleUpdate()
+{
+	count = 0;
+}
+
+Mesh::Mesh(DX12Base* base)
+{
+	device = base->GetDevice();
+	commandList = base->GetCommandList();
+	CreateBuff();
+	CreatPipeline();
+}
+
+void Mesh::CreatPipeline()
+{
+	HRESULT result;
+
 	ID3DBlob* vsBlob = nullptr; // 頂点シェーダオブジェクト
 	ID3DBlob* psBlob = nullptr; // ピクセルシェーダオブジェクト
 	ID3DBlob* errorBlob = nullptr; // エラーオブジェクト
 
 	// 頂点シェーダの読み込みとコンパイル
 	result = D3DCompileFromFile(
-		L"ShapeVS.hlsl", // シェーダファイル名
+		L"MeshVS.hlsl", // シェーダファイル名
 		nullptr,
 		D3D_COMPILE_STANDARD_FILE_INCLUDE, // インクルード可能にする
 		"main", "vs_5_0", // エントリーポイント名、シェーダーモデル指定
 		D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, // デバッグ用設定
 		0,
 		&vsBlob, &errorBlob);
-
 
 	// エラーなら
 	if (FAILED(result))
@@ -45,7 +131,7 @@ HRESULT Shape::CreatePipeline(D3D12_PRIMITIVE_TOPOLOGY_TYPE type, BlendMode Mode
 
 	// ピクセルシェーダの読み込みとコンパイル
 	result = D3DCompileFromFile(
-		L"ShapePS.hlsl", // シェーダファイル名
+		L"MeshPS.hlsl", // シェーダファイル名
 		nullptr,
 		D3D_COMPILE_STANDARD_FILE_INCLUDE, // インクルード可能にする
 		"main", "ps_5_0", // エントリーポイント名、シェーダーモデル指定
@@ -69,8 +155,12 @@ HRESULT Shape::CreatePipeline(D3D12_PRIMITIVE_TOPOLOGY_TYPE type, BlendMode Mode
 	}
 
 	// 頂点レイアウト
-	inputLayout[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,D3D12_APPEND_ALIGNED_ELEMENT,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	inputLayout[1] = { "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,D3D12_APPEND_ALIGNED_ELEMENT,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
+		//座標
+		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,D3D12_APPEND_ALIGNED_ELEMENT,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+		//uv座標 
+		{"COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,D3D12_APPEND_ALIGNED_ELEMENT,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+	};
 
 	// グラフィックスパイプライン設定
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC pipelineDesc{};
@@ -90,35 +180,7 @@ HRESULT Shape::CreatePipeline(D3D12_PRIMITIVE_TOPOLOGY_TYPE type, BlendMode Mode
 	pipelineDesc.RasterizerState.DepthClipEnable = true; // 深度クリッピングを有効に
 
 	// ブレンドステート
-	//pipelineDesc.BlendState.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL; // RBGA全てのチャンネルを描画
-	D3D12_RENDER_TARGET_BLEND_DESC& blenddesc = pipelineDesc.BlendState.RenderTarget[0];
-	blenddesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
-
-	//共通設定(アルファ値)
-	blenddesc.BlendEnable = true;// ブレンドを有効
-	blenddesc.BlendOpAlpha = D3D12_BLEND_OP_ADD;//加算
-	blenddesc.SrcBlendAlpha = D3D12_BLEND_ONE;//ソースの値を100%使う
-	blenddesc.DestBlendAlpha = D3D12_BLEND_ZERO;//テストの値を0%使う
-
-	//// 加算合成
-	//blenddesc.BlendOp = D3D12_BLEND_OP_ADD;// 加算
-	//blenddesc.SrcBlend = D3D12_BLEND_ONE;// ソースの値を100% 使う
-	//blenddesc.DestBlend = D3D12_BLEND_ONE;// デストの値を100% 使う
-
-	//// 減算合成
-	//blenddesc.BlendOp = D3D12_BLEND_OP_REV_SUBTRACT;// デストからソースを減算
-	//blenddesc.SrcBlend = D3D12_BLEND_ONE;// ソースの値を100% 使う
-	//blenddesc.DestBlend = D3D12_BLEND_ONE;// デストの値を100% 使う
-
-	//// 色反転
-	//blenddesc.BlendOp = D3D12_BLEND_OP_ADD;// 加算
-	//blenddesc.SrcBlend = D3D12_BLEND_INV_DEST_COLOR;// 1.0f-デストカラーの値
-	//blenddesc.DestBlend = D3D12_BLEND_ZERO;// 使わない
-
-	// 半透明合成
-	blenddesc.BlendOp = D3D12_BLEND_OP_ADD;// 加算
-	blenddesc.SrcBlend = D3D12_BLEND_SRC_ALPHA;// ソースのアルファ値
-	blenddesc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;;// 1.0f-ソースのアルファ値
+	pipelineDesc.BlendState.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL; // RBGA全てのチャンネルを描画
 
 	// 頂点レイアウトの設定
 	pipelineDesc.InputLayout.NumElements = _countof(inputLayout);
@@ -134,35 +196,9 @@ HRESULT Shape::CreatePipeline(D3D12_PRIMITIVE_TOPOLOGY_TYPE type, BlendMode Mode
 	pipelineDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB; // 0～255指定のRGBA
 	pipelineDesc.SampleDesc.Count = 1; // 1ピクセルにつき1回サンプリング
 
-	//テクスチャサンプラーの設定
-	D3D12_STATIC_SAMPLER_DESC samplerDesc{};
-	samplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;//横繰り返し（タイリング）
-	samplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;//縦繰り返し（タイリング）
-	samplerDesc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;//奥行繰り返し（タイリング）
-	samplerDesc.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;//ボーダーの時は黒
-	samplerDesc.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;//全てリニア補間
-	samplerDesc.MaxLOD = D3D12_FLOAT32_MAX;//ミップマップ最大値
-	samplerDesc.MinLOD = 0.0f;//ミップマップ最小値
-	samplerDesc.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
-	samplerDesc.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;//ピクセルシェーダからのみ使用可能
-
-		//ルートパラメータの設定
-	D3D12_ROOT_PARAMETER rootParams[1] = {};
-	//定数バッファ0番
-	rootParams[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;//種類
-	rootParams[0].Descriptor.ShaderRegister = 0;//定数バッファバッファ番号
-	rootParams[0].Descriptor.RegisterSpace = 0;//デフォルト値
-	rootParams[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;//全てのシェーダーから見える
-
-	// ルートシグネチャ
-	ID3D12RootSignature* rootSignature;
 	// ルートシグネチャの設定
 	D3D12_ROOT_SIGNATURE_DESC rootSignatureDesc{};
 	rootSignatureDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
-	rootSignatureDesc.pParameters = rootParams; //ルートパラメータの先頭アドレス
-	rootSignatureDesc.NumParameters = _countof(rootParams);        //ルートパラメータ数
-	rootSignatureDesc.pStaticSamplers = &samplerDesc;
-	rootSignatureDesc.NumStaticSamplers = 1;
 
 	// ルートシグネチャのシリアライズ
 	ID3DBlob* rootSigBlob = nullptr;
@@ -175,9 +211,6 @@ HRESULT Shape::CreatePipeline(D3D12_PRIMITIVE_TOPOLOGY_TYPE type, BlendMode Mode
 	pipelineDesc.pRootSignature = rootSignature;
 
 	// パイプランステートの生成
-	ID3D12PipelineState* pipelineState;
-	result = device->CreateGraphicsPipelineState(&pipelineDesc, IID_PPV_ARGS(&pipelineState));
+	result =device->CreateGraphicsPipelineState(&pipelineDesc, IID_PPV_ARGS(&pipelineState));
 	assert(SUCCEEDED(result));
-
-	return E_NOTIMPL;
 }

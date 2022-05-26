@@ -1,7 +1,7 @@
 #include "WinApi.h"
 #include<string>
 
-WinApi* WinApi:: WinApi_ = NULL;
+static WinApi* WinApi_ = nullptr;
 HWND WinApi::hwnd = nullptr;
 WNDCLASSEX WinApi::WndClass = {};
 
@@ -22,6 +22,9 @@ LRESULT WindowProcedure(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 
 void WinApi::CreateGameWindow(const wchar_t* title, UINT windowStyle, int32_t Width, int32_t Height)
 {
+	WindowSize.window_height = Height;
+	WindowSize.window_widht = Width;
+
 	HINSTANCE hinst = GetModuleHandle(nullptr);
 	//ウィンドウクラス生成＆登録
 	WndClass.cbSize = sizeof(WNDCLASSEX);
@@ -107,4 +110,9 @@ bool WinApi::WindowMessage()
 	}
 
 	return false;
+}
+
+WINDOWSIZE WinApi::GetWindowSize()
+{
+	return WindowSize;
 }

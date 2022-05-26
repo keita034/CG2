@@ -18,13 +18,11 @@ Input::~Input()
 
 void Input::Initialize()
 {
-	WinApi* w = nullptr;
-
-	w = w->GetInstance();
-
+	WinApi* win = nullptr;
+	win = win->GetInstance();
 	//DirectInputの初期化
 	IDirectInput8* directInput = nullptr;
-	auto result = DirectInput8Create(w->GetWndclassex().hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&directInput, nullptr);
+	auto result = DirectInput8Create(win->GetWndclassex().hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&directInput, nullptr);
 	assert(SUCCEEDED(result));
 
 	//キーボードデバイスの生成
@@ -36,7 +34,7 @@ void Input::Initialize()
 	assert(SUCCEEDED(result));
 
 	//排他制御レベルのセット
-	result = keyboard->SetCooperativeLevel(w->GetHwnd(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
+	result = keyboard->SetCooperativeLevel(win->GetHwnd(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
 	//DISCL_FOREGROUND		画面が手前にある場合のみ入力を受け付ける
 	//DISCL_NONEXCLUSIVE	デバイスをこのアプリだけで専有しない
 	//DISCL_NOWINKEY		Windowキーを無効にする

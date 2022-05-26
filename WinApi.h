@@ -8,6 +8,13 @@ const std::wstring TitleName = L"DirectXGame";
 const int window_widht = 1200;
 const int window_height = 720;
 
+struct WINDOWSIZE
+{
+	int window_widht = 1200;
+	int window_height = 720;
+
+};
+
 class WinApi
 {
 public:
@@ -21,17 +28,19 @@ public:
 	*/
 	void CreateGameWindow(const wchar_t* title = TitleName.data(), UINT windowStyle = WS_OVERLAPPEDWINDOW, int32_t Width = window_widht, int32_t Height = window_height);
 
-	 HWND GetHwnd();
+	HWND GetHwnd();
+
+	WINDOWSIZE GetWindowSize();
 
 	WNDCLASSEX GetWndclassex();
 
-	 WinApi* GetInstance();
+	WinApi* GetInstance();
 
-	 void Create();
+	void Create();
 
-	 void Destroy();
+	void Destroy();
 
-	 bool WindowMessage();
+	bool WindowMessage();
 
 private:
 
@@ -40,9 +49,7 @@ private:
 	UINT msg;
 	WPARAM wparam;
 	LPARAM lparam;
-	
-
-	static WinApi* WinApi_;
+	WINDOWSIZE WindowSize;
 
 	// ‰B‚µ
 	WinApi() = default;
