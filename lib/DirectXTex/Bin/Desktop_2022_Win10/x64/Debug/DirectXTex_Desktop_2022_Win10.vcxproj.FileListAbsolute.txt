@@ -1,0 +1,2 @@
+C:\k021g1266\CG2\CG2 - コピー\DirectXTex\Bin\Desktop_2022_Win10\x64\Debug\DirectXTex.lib
+C:\k021g1266\CG2\CG2 - コピー\lib\DirectXTex\Bin\Desktop_2022_Win10\x64\Debug\DirectXTex.lib

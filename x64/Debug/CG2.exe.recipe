@@ -7,16 +7,28 @@
   </ProjectOutputs>
   <ContentFiles>
     <ContentFile>
-      <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Debug\BasicPS.cso</FullPath>
-    </ContentFile>
-    <ContentFile>
-      <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Debug\BasicVS.cso</FullPath>
-    </ContentFile>
-    <ContentFile>
       <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Debug\MeshPS.cso</FullPath>
     </ContentFile>
     <ContentFile>
       <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Debug\MeshVS.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Debug\Sprite2DPS.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Debug\Sprite2DVS.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Debug\ModelPS.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Debug\ModelVS.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Debug\Sprite3DPS.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Debug\Sprite3DVS.cso</FullPath>
     </ContentFile>
   </ContentFiles>
   <SatelliteDlls />
