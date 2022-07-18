@@ -7,16 +7,37 @@
   </ProjectOutputs>
   <ContentFiles>
     <ContentFile>
-      <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Release\BasicPS.cso</FullPath>
-    </ContentFile>
-    <ContentFile>
-      <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Release\BasicVS.cso</FullPath>
-    </ContentFile>
-    <ContentFile>
       <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Release\MeshPS.cso</FullPath>
     </ContentFile>
     <ContentFile>
       <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Release\MeshVS.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Release\ParticleGS.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Release\ParticlePS.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Release\ParticleVS.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Release\SpritePS.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Release\SpriteVS.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Release\ModelPS.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Release\ModelVS.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Release\objPS.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Release\objVS.cso</FullPath>
     </ContentFile>
   </ContentFiles>
   <SatelliteDlls />

@@ -47,7 +47,7 @@ void Camera::Initialize(UpdateProjMatrixFunc matFunc)
 	//ビュー行列の算出
 	MyMath::MakeLookL(eye, target, up, viewMatrix);
 	//ビュー行列の逆行列を計算
-	viewMatrixInv = MyMath::MakeInverse(viewMatrix);
+	viewMatrixInv = MyMath::MakeInverse(&viewMatrix);
 	//ビュープロジェクション行列の作成
 	viewProjectionMatrix = viewMatrix * projectionMatrix;
 
@@ -108,7 +108,7 @@ void Camera::Update()
 		//ビュープロジェクション行列の作成
 		viewProjectionMatrix = viewMatrix * projectionMatrix;
 		//ビュー行列の逆行列を計算
-		viewMatrixInv = MyMath::MakeInverse(viewMatrix);
+		viewMatrixInv = MyMath::MakeInverse(&viewMatrix);
 
 		forward = { viewMatrixInv.m[2][0], viewMatrixInv.m[2][1], viewMatrixInv.m[2][2] };
 

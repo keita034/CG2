@@ -5,55 +5,50 @@
 //自作.h
 #include "WindowsApp.h"
 #include "Input.h"
+#include"Controller.h"
 #include"DirectX12Core.h"
 #include"Mesh.h"
-#include"Sprite2D.h"
-#include"Sprite3D.h"
 #include"Camera.h"
-#include"Model.h"
+#include"GameScene.h"
+#include"FPS.h"
 
 //pragma comment
 
 
-
 //using namespace
-
-
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 {
-
+	
 	WindowsApp* windowsApp = WindowsApp::GetInstance();//WindowsAppクラス読み込み
-
 	windowsApp->CreatWindow();//ウィンドウ生成
+
 	//DirectX初期化処理ここから
 
 	DirectX12Core* DirectX12Core = DirectX12Core::GetInstance();//DirectX12Coreクラス読み込み
 
 	DirectX12Core->DirectXInitialize();//DirectX12初期化
 
-	DirectX12Core->SetBackScreenColor(0.1f, 0.25f, 0.5f, 0.0f);	//背景の色変更(R,G,B,A)
+	DirectX12Core->SetBackScreenColor(1.0f, 1.0f, 1.0f, 0.0f);	//背景の色変更(R,G,B,A)
 
 	//DirectX初期化処理ここまで
 
 	//描画初期化処理ここから
-	Mesh* mesh = new Mesh();
-
-	Camera* camera = new Camera();
-	camera->Initialize(UpdateProjMatrixFunc_Perspective);
-	Model* model = new Model();
-	model->Create(Cube);
-	model->SetTexture(L"Resources/mario.jpg");
-
+	Mesh* mesh = Mesh::GetInstance();
 	//描画初期化処理ここまで
-	Input* input = new Input();
+	Input* input = Input::GetInstance();
 	input->Initialize();
-	float angle = 0.0f;
-	camera->SetPosition(-10.0f * sinf(angle), 0.0f, -10.0f * cosf(angle));
+
+	GameScene* gameScene = new GameScene;
+	gameScene->Initialize();
+
+	FPS* fps = new FPS;
+
 	//ゲームループ
 	while (true)
 	{
+		fps->FpsControlBegin();
 
 		if (!windowsApp->MessageWindow())//メッセージ処理
 		{
@@ -69,35 +64,30 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 		mesh->DrawReset();
 		input->Update();
 
-		if (input->KeepPush(DIK_D)||input->KeepPush(DIK_A))
-		{
-			if (input->KeepPush(DIK_D))
-			{
-				angle += MyMath::ChangeRadians(1.0f);
-			}
+		gameScene->Update();
 
-			if (input->KeepPush(DIK_A))
-			{
-				angle -= MyMath::ChangeRadians(1.0f);
-			}
-			
-			camera->SetPosition(-10.0f*sinf(angle),0.0f, -10.0f * cosf(angle));
-		}
-
-
-		model->Update(MyMath::Vector3(0, 0, 0), MyMath::Vector3(0, 0, 0), MyMath::Vector3(1.0f, 1.0f, 1));
-		model->Draw(camera);
 		//描画処理
-		
+
+		gameScene->Draw();
+
 		//DirectX毎フレーム処理　ここまで
 
 		DirectX12Core->EndDraw();//描画後処理
 
+		if (input->TriggerPush(DIK_ESCAPE))
+		{
+			break;
+		}
+
+		fps->FpsControlEnd();
+
 	}
 
 	windowsApp->Break();
-
-
+	DirectX12Core->Destroy();
+	delete gameScene;
+	mesh->Destroy();
+	delete fps;
 
 	return 0;
 }

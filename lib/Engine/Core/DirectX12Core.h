@@ -8,18 +8,18 @@ private:
 
 	HRESULT result;
 	char PADDING[4];
-	ID3D12Device* device = nullptr;
-	IDXGIFactory7* dxgiFactory = nullptr;
-	IDXGISwapChain4* swapChain = nullptr;
-	ID3D12CommandAllocator* cmdAllocator = nullptr;
-	ID3D12GraphicsCommandList* commandList = nullptr;
-	ID3D12CommandQueue* commandQueue = nullptr;
-	ID3D12DescriptorHeap* rtvHeap = nullptr;
-	ID3D12Fence* fence = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12Device> device;
+	Microsoft::WRL::ComPtr<IDXGIFactory7> dxgiFactory;
+	Microsoft::WRL::ComPtr<IDXGISwapChain4> swapChain;
+	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> cmdAllocator;
+	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> commandList;
+	Microsoft::WRL::ComPtr<ID3D12CommandQueue> commandQueue;
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvHeap;
+	Microsoft::WRL::ComPtr<ID3D12Fence> fence;
 
 
 	//バックバッファ
-	std::vector<ID3D12Resource*> backBuffers;
+	std::vector< Microsoft::WRL::ComPtr<ID3D12Resource>> backBuffers;
 
 	//バリアーデスク
 	D3D12_RESOURCE_BARRIER barrierDesc{};
@@ -46,8 +46,11 @@ private:
 
 	//深度バッファ
 	Microsoft::WRL::ComPtr<ID3D12Resource> depthBuff;
+
 	//深度ビュー用デスクプリタヒープ
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvHeap;
+
+	static DirectX12Core* DirectX12Core_;
 
 public:
 
@@ -66,23 +69,23 @@ public:
 	//コマンド後始末
 	void ExecuteCommand();
 
-
+	void Destroy();
 	//セッター
 
 	//背景の色変え(RGBA)
-	void SetBackScreenColor(float red,float green,float blue,float alpha);
+	void SetBackScreenColor(float red, float green, float blue, float alpha);
 
 	//ゲッター
-	ID3D12Device* GetDevice();
-	ID3D12GraphicsCommandList* GetCommandList();
-	ID3D12DescriptorHeap* GetRtvHeap();
-	IDXGISwapChain4* GetSwapChain();
+	Microsoft::WRL::ComPtr<ID3D12Device> GetDevice();
+	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> GetCommandList();
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> GetRtvHeap();
+	Microsoft::WRL::ComPtr<IDXGISwapChain4> GetSwapChain();
 	D3D12_CPU_DESCRIPTOR_HANDLE GetRtvHandle();
-	ID3D12CommandAllocator* GetCmdAllocator();
-	ID3D12CommandQueue* GetCommandQueue();
+	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> GetCmdAllocator();
+	Microsoft::WRL::ComPtr<ID3D12CommandQueue> GetCommandQueue();
 	D3D12_DESCRIPTOR_HEAP_DESC GetRtvHeapDesc();
-	IDXGIFactory6* GetDxgiFactory();
-	ID3D12Fence* GetFence();
+	Microsoft::WRL::ComPtr<IDXGIFactory7> GetDxgiFactory();
+	Microsoft::WRL::ComPtr<ID3D12Fence> GetFence();
 	UINT64 GetFenceVal();
 
 #pragma region テンプレート関数
@@ -150,5 +153,3 @@ private:
 	DirectX12Core() = default;
 	~DirectX12Core() = default;
 };
-
-

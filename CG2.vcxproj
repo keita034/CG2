@@ -20,27 +20,68 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="lib\Engine\2D\Mesh.cpp" />
-    <ClCompile Include="lib\Engine\2D\Sprite2D.cpp" />
-    <ClCompile Include="lib\Engine\3D\Model.cpp" />
-    <ClCompile Include="lib\Engine\3D\Sprite3D.cpp" />
+    <ClCompile Include="lib\Engine\2D\Particle\BasicParticle.cpp" />
+    <ClCompile Include="lib\Engine\2D\Particle\ParticleCreat.cpp" />
+    <ClCompile Include="lib\Engine\2D\Sprite\Sprite2D.cpp" />
+    <ClCompile Include="lib\Engine\2D\Sprite\Sprite3D.cpp" />
+    <ClCompile Include="lib\Engine\2D\Sprite\SpriteCreat.cpp" />
+    <ClCompile Include="lib\Engine\3D\Model\ModelCone.cpp" />
+    <ClCompile Include="lib\Engine\3D\Model\ModelCreate.cpp" />
+    <ClCompile Include="lib\Engine\3D\Model\ModelCube.cpp" />
+    <ClCompile Include="lib\Engine\3D\Model\ModelCylinder.cpp" />
+    <ClCompile Include="lib\Engine\3D\Model\ModelSphere.cpp" />
+    <ClCompile Include="lib\Engine\3D\Model\objModel.cpp" />
     <ClCompile Include="lib\Engine\Camera\Camera.cpp" />
+    <ClCompile Include="lib\Engine\Collision\Collision.cpp" />
+    <ClCompile Include="lib\Engine\Collision\CollisionPrimitive.cpp" />
     <ClCompile Include="lib\Engine\Core\DirectX12Core.cpp" />
+    <ClCompile Include="lib\Engine\Core\FPS.cpp" />
     <ClCompile Include="lib\Engine\Core\WindowsApp.cpp" />
+    <ClCompile Include="lib\Engine\Input\Controller.cpp" />
     <ClCompile Include="lib\Engine\Input\Input.cpp" />
+    <ClCompile Include="lib\Engine\Input\Keyboard.cpp" />
+    <ClCompile Include="lib\Engine\Input\Mouse.cpp" />
+    <ClCompile Include="lib\Engine\Math\Matrix4.cpp" />
     <ClCompile Include="lib\Engine\Math\MyMath.cpp" />
+    <ClCompile Include="lib\Engine\Math\Vector2.cpp" />
+    <ClCompile Include="lib\Engine\Math\Vector3.cpp" />
+    <ClCompile Include="lib\Engine\Math\Vector4.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Users\Scene\GameScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\Engine\2D\Mesh.h" />
-    <ClInclude Include="lib\Engine\2D\Sprite2D.h" />
-    <ClInclude Include="lib\Engine\3D\Model.h" />
-    <ClInclude Include="lib\Engine\3D\Sprite3D.h" />
+    <ClInclude Include="lib\Engine\2D\Particle\BasicParticle.h" />
+    <ClInclude Include="lib\Engine\2D\Particle\Particle.h" />
+    <ClInclude Include="lib\Engine\2D\Particle\ParticleCreat.h" />
+    <ClInclude Include="lib\Engine\2D\Sprite\Sprite.h" />
+    <ClInclude Include="lib\Engine\2D\Sprite\Sprite2D.h" />
+    <ClInclude Include="lib\Engine\2D\Sprite\Sprite3D.h" />
+    <ClInclude Include="lib\Engine\2D\Sprite\SpriteCreat.h" />
+    <ClInclude Include="lib\Engine\3D\Model\Model.h" />
+    <ClInclude Include="lib\Engine\3D\Model\ModelCone.h" />
+    <ClInclude Include="lib\Engine\3D\Model\ModelCreate.h" />
+    <ClInclude Include="lib\Engine\3D\Model\ModelCube.h" />
+    <ClInclude Include="lib\Engine\3D\Model\ModelCylinder.h" />
+    <ClInclude Include="lib\Engine\3D\Model\ModelSphere.h" />
+    <ClInclude Include="lib\Engine\3D\Model\objModel.h" />
     <ClInclude Include="lib\Engine\Camera\Camera.h" />
+    <ClInclude Include="lib\Engine\Collision\Collision.h" />
+    <ClInclude Include="lib\Engine\Collision\CollisionPrimitive.h" />
     <ClInclude Include="lib\Engine\Core\DirectX12Core.h" />
     <ClInclude Include="lib\Engine\Core\ErrorException.h" />
+    <ClInclude Include="lib\Engine\Core\FPS.h" />
     <ClInclude Include="lib\Engine\Core\WindowsApp.h" />
+    <ClInclude Include="lib\Engine\Input\Controller.h" />
     <ClInclude Include="lib\Engine\Input\Input.h" />
+    <ClInclude Include="lib\Engine\Input\Keyboard.h" />
+    <ClInclude Include="lib\Engine\Input\Mouse.h" />
+    <ClInclude Include="lib\Engine\Math\Matrix4.h" />
     <ClInclude Include="lib\Engine\Math\MyMath.h" />
+    <ClInclude Include="lib\Engine\Math\Vector2.h" />
+    <ClInclude Include="lib\Engine\Math\Vector3.h" />
+    <ClInclude Include="lib\Engine\Math\Vector4.h" />
+    <ClInclude Include="Users\Scene\GameScene.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="lib\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj">
@@ -49,9 +90,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Shaders\2D\Mesh.hlsli" />
-    <None Include="Resources\Shaders\2D\Sprite2D.hlsli" />
+    <None Include="Resources\Shaders\2D\Particle.hlsli" />
+    <None Include="Resources\Shaders\2D\Sprite.hlsli" />
     <None Include="Resources\Shaders\3D\Model.hlsli" />
-    <None Include="Resources\Shaders\3D\Sprite3D.hlsli" />
+    <None Include="Resources\Shaders\3D\objSH.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\Shaders\2D\MeshPS.hlsl">
@@ -65,12 +107,29 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
     </FxCompile>
-    <FxCompile Include="Resources\Shaders\2D\Sprite2DPS.hlsl">
+    <FxCompile Include="Resources\Shaders\2D\ParticleGS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\2D\ParticlePS.hlsl">
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
     </FxCompile>
-    <FxCompile Include="Resources\Shaders\2D\Sprite2DVS.hlsl">
+    <FxCompile Include="Resources\Shaders\2D\ParticleVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\2D\SpritePS.hlsl">
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\2D\SpriteVS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
@@ -87,12 +146,12 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
     </FxCompile>
-    <FxCompile Include="Resources\Shaders\3D\Sprite3DPS.hlsl">
+    <FxCompile Include="Resources\Shaders\3D\objPS.hlsl">
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
     </FxCompile>
-    <FxCompile Include="Resources\Shaders\3D\Sprite3DVS.hlsl">
+    <FxCompile Include="Resources\Shaders\3D\objVS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
@@ -125,6 +184,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <SpectreMitigation>Spectre</SpectreMitigation>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -132,6 +192,7 @@
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <SpectreMitigation>Spectre</SpectreMitigation>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -195,11 +256,15 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>EnableAllWarnings</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)lib\Engine\2D;$(ProjectDir)lib\Engine\3D;$(ProjectDir)lib\Engine\Camera;$(ProjectDir)lib\Engine\Core;$(ProjectDir)lib\Engine\Math;$(ProjectDir)lib\Engine\Input;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)lib\Engine\Collision;$(ProjectDir)\lib\Engine\3D\Model;$(ProjectDir)lib\Engine\2D\Sprite;$(ProjectDir)lib\Engine\2D\Particle;$(ProjectDir)lib\Engine\2D;$(ProjectDir)lib\Engine\3D;$(ProjectDir)lib\Engine\Camera;$(ProjectDir)lib\Engine\Core;$(ProjectDir)lib\Engine\Math;$(ProjectDir)lib\Engine\Input;$(ProjectDir);$(ProjectDir)\Users\Scene;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <DisableSpecificWarnings>5045;4710;</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -211,13 +276,17 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>EnableAllWarnings</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)lib\Engine\2D;$(ProjectDir)lib\Engine\3D;$(ProjectDir)lib\Engine\Camera;$(ProjectDir)lib\Engine\Core;$(ProjectDir)lib\Engine\Math;$(ProjectDir)lib\Engine\Input;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)lib\Engine\Collision;$(ProjectDir)\lib\Engine\3D\Model;$(ProjectDir)lib\Engine\2D\Sprite;$(ProjectDir)lib\Engine\2D\Particle;$(ProjectDir)lib\Engine\2D;$(ProjectDir)lib\Engine\3D;$(ProjectDir)lib\Engine\Camera;$(ProjectDir)lib\Engine\Core;$(ProjectDir)lib\Engine\Math;$(ProjectDir)lib\Engine\Input;$(ProjectDir);$(ProjectDir)\Users\Scene;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <DisableSpecificWarnings>5045;4710;</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

@@ -1,6 +1,5 @@
 cbuffer cbuff0 : register(b0)
 {
-    matrix mat; // 2Ｄ変換行列
     matrix matWorld; // 
 };
 
@@ -8,6 +7,7 @@ cbuffer cbuff0 : register(b0)
 struct VSOutput
 {
     float4 svpos : SV_POSITION; // システム用頂点座標
+    float3 normal : NORMAL;//法線ベクトル
     float2 uv : TEXCOORD; // uv値
     float4 color : COLOR; // 色(RGBA)
 };

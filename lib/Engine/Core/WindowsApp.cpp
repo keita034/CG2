@@ -1,4 +1,5 @@
 #include "WindowsApp.h"
+#include"DirectX12Core.h"
 
 //ウインドウプロシージャ
 LRESULT WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
@@ -72,6 +73,7 @@ bool WindowsApp::MessageWindow()
 	//×ボタンで終了メッセージが来たらゲームループを抜ける
 	if (massege.message == WM_QUIT)
 	{
+		//DirectX12Core::GetInstance()->GetDevice()->Re
 		return false;
 	}
 	return true;

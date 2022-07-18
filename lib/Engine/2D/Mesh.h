@@ -114,6 +114,8 @@ private:
 	//四角形使用数
 	UINT boxCount = 0;
 
+	static Mesh* mesh;
+
 public:
 
 	///<summary>
@@ -183,10 +185,21 @@ public:
 	///<returns>色コード</returns>
 	MyMath::Vector4 GetColor(int red = 255, int blue = 255, int green = 255, int alpha = 255);
 
-	//コンストラクタ
-	Mesh();
+	/// <summary>
+	/// インスタンスを所得
+	/// </summary>
+	/// <returns>インスタンス</returns>
+	static Mesh* GetInstance();
+
+	/// <summary>
+	/// インスタンスを解放
+	/// </summary>
+	void Destroy();
 
 private:
+
+	//コンストラクタ
+	Mesh();
 
 	//三角形を描画する(中身塗りつぶし)
 	void DrawTriangleFill(float x1, float y1, float x2, float y2, float x3, float y3, MyMath::Vector4 color);

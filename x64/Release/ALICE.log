@@ -1,3 +1,0 @@
-﻿  failed to open file: C:\Users\keike\source\repos\ALICE\ALICE\Resources\Shaders\3D\ModelPS .hlsl
-  compilation failed; no code produced
-C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppCommon.targets(1775,5): error MSB6006: "fxc.exe" はコード 1 を伴って終了しました。

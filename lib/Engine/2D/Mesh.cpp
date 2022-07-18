@@ -1,5 +1,7 @@
 #include"Mesh.h"
 
+Mesh* Mesh::mesh = nullptr;
+
 #pragma region パブリック
 
 //線を描画する
@@ -96,7 +98,6 @@ void Mesh::DrawEllipse(float x, float y, float radiusX, float radiusY, float ang
 	(*pointsX.rbegin()) = (*pointsX.begin());
 	(*pointsY.rbegin()) = (*pointsY.begin());
 
-
 	if (fillMode)
 	{
 		for (size_t index = 0; index < NumDiv; ++index)
@@ -170,6 +171,21 @@ Mesh::Mesh()
 #pragma endregion
 
 #pragma region プライベート
+
+Mesh* Mesh::GetInstance()
+{
+	if (mesh == nullptr)
+	{
+		mesh = new Mesh();
+	}
+
+	return mesh;
+}
+
+void Mesh::Destroy()
+{
+	delete mesh;
+}
 
 //三角形を描画する(中身塗りつぶし)
 void Mesh::DrawTriangleFill(float x1, float y1, float x2, float y2, float x3, float y3, MyMath::Vector4 color)
