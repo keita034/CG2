@@ -7,10 +7,37 @@
   </ProjectOutputs>
   <ContentFiles>
     <ContentFile>
-      <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Debug\BasicPS.cso</FullPath>
+      <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Debug\MeshPS.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Debug\BasicVS.cso</FullPath>
+      <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Debug\MeshVS.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Debug\ParticleGS.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Debug\ParticlePS.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Debug\ParticleVS.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Debug\SpritePS.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Debug\SpriteVS.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Debug\ModelPS.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Debug\ModelVS.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Debug\objPS.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\k021g1266\CG2\CG2 - コピー\x64\Debug\objVS.cso</FullPath>
     </ContentFile>
   </ContentFiles>
   <SatelliteDlls />

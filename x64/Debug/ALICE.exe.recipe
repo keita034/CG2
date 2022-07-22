@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <ProjectOutputs>
+    <ProjectOutput>
+      <FullPath>C:\Users\keike\source\repos\ALICE\x64\Debug\ALICE.exe</FullPath>
+    </ProjectOutput>
+  </ProjectOutputs>
+  <ContentFiles>
+    <ContentFile>
+      <FullPath>C:\Users\keike\source\repos\ALICE\x64\Debug\MeshPS.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\keike\source\repos\ALICE\x64\Debug\MeshVS.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\keike\source\repos\ALICE\x64\Debug\Sprite2DPS.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\keike\source\repos\ALICE\x64\Debug\Sprite2DVS.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\keike\source\repos\ALICE\x64\Debug\ModelPS .cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\keike\source\repos\ALICE\x64\Debug\ModelVS.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\keike\source\repos\ALICE\x64\Debug\Sprite3DPS.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\keike\source\repos\ALICE\x64\Debug\Sprite3DVS.cso</FullPath>
+    </ContentFile>
+  </ContentFiles>
+  <SatelliteDlls />
+  <NonRecipeFileRefs />
+</Project>
