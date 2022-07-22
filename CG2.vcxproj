@@ -25,10 +25,12 @@
     <ClCompile Include="lib\Engine\2D\Sprite\Sprite2D.cpp" />
     <ClCompile Include="lib\Engine\2D\Sprite\Sprite3D.cpp" />
     <ClCompile Include="lib\Engine\2D\Sprite\SpriteCreat.cpp" />
+    <ClCompile Include="lib\Engine\3D\Model\Model.cpp" />
     <ClCompile Include="lib\Engine\3D\Model\ModelCone.cpp" />
     <ClCompile Include="lib\Engine\3D\Model\ModelCreate.cpp" />
     <ClCompile Include="lib\Engine\3D\Model\ModelCube.cpp" />
     <ClCompile Include="lib\Engine\3D\Model\ModelCylinder.cpp" />
+    <ClCompile Include="lib\Engine\3D\Model\ModelPipeLine.cpp" />
     <ClCompile Include="lib\Engine\3D\Model\ModelSphere.cpp" />
     <ClCompile Include="lib\Engine\3D\Model\objModel.cpp" />
     <ClCompile Include="lib\Engine\Camera\Camera.cpp" />
@@ -41,6 +43,7 @@
     <ClCompile Include="lib\Engine\Input\Input.cpp" />
     <ClCompile Include="lib\Engine\Input\Keyboard.cpp" />
     <ClCompile Include="lib\Engine\Input\Mouse.cpp" />
+    <ClCompile Include="lib\Engine\Light\Light.cpp" />
     <ClCompile Include="lib\Engine\Math\Matrix4.cpp" />
     <ClCompile Include="lib\Engine\Math\MyMath.cpp" />
     <ClCompile Include="lib\Engine\Math\Vector2.cpp" />
@@ -63,6 +66,7 @@
     <ClInclude Include="lib\Engine\3D\Model\ModelCreate.h" />
     <ClInclude Include="lib\Engine\3D\Model\ModelCube.h" />
     <ClInclude Include="lib\Engine\3D\Model\ModelCylinder.h" />
+    <ClInclude Include="lib\Engine\3D\Model\ModelPipeLine.h" />
     <ClInclude Include="lib\Engine\3D\Model\ModelSphere.h" />
     <ClInclude Include="lib\Engine\3D\Model\objModel.h" />
     <ClInclude Include="lib\Engine\Camera\Camera.h" />
@@ -76,6 +80,7 @@
     <ClInclude Include="lib\Engine\Input\Input.h" />
     <ClInclude Include="lib\Engine\Input\Keyboard.h" />
     <ClInclude Include="lib\Engine\Input\Mouse.h" />
+    <ClInclude Include="lib\Engine\Light\Light.h" />
     <ClInclude Include="lib\Engine\Math\Matrix4.h" />
     <ClInclude Include="lib\Engine\Math\MyMath.h" />
     <ClInclude Include="lib\Engine\Math\Vector2.h" />
@@ -152,6 +157,11 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="lib\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj">
+      <Project>{371b9fa9-4c90-4ac6-a123-aced756d6c77}</Project>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -255,9 +265,9 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)lib\Engine\Collision;$(ProjectDir)\lib\Engine\3D\Model;$(ProjectDir)lib\Engine\2D\Sprite;$(ProjectDir)lib\Engine\2D\Particle;$(ProjectDir)lib\Engine\2D;$(ProjectDir)lib\Engine\3D;$(ProjectDir)lib\Engine\Camera;$(ProjectDir)lib\Engine\Core;$(ProjectDir)lib\Engine\Math;$(ProjectDir)lib\Engine\Input;$(ProjectDir);$(ProjectDir)\Users\Scene;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\lib\Engine\Light;$(ProjectDir)lib\Engine\Collision;$(ProjectDir)\lib\Engine\3D\Model;$(ProjectDir)lib\Engine\2D\Sprite;$(ProjectDir)lib\Engine\2D\Particle;$(ProjectDir)lib\Engine\2D;$(ProjectDir)lib\Engine\3D;$(ProjectDir)lib\Engine\Camera;$(ProjectDir)lib\Engine\Core;$(ProjectDir)lib\Engine\Math;$(ProjectDir)lib\Engine\Input;$(ProjectDir);$(ProjectDir)\Users\Scene;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <TreatWarningAsError>true</TreatWarningAsError>
+      <TreatWarningAsError>false</TreatWarningAsError>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <DisableSpecificWarnings>5045;4710;</DisableSpecificWarnings>
     </ClCompile>
@@ -277,11 +287,12 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)lib\Engine\Collision;$(ProjectDir)\lib\Engine\3D\Model;$(ProjectDir)lib\Engine\2D\Sprite;$(ProjectDir)lib\Engine\2D\Particle;$(ProjectDir)lib\Engine\2D;$(ProjectDir)lib\Engine\3D;$(ProjectDir)lib\Engine\Camera;$(ProjectDir)lib\Engine\Core;$(ProjectDir)lib\Engine\Math;$(ProjectDir)lib\Engine\Input;$(ProjectDir);$(ProjectDir)\Users\Scene;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\lib\Engine\Light;$(ProjectDir)lib\Engine\Collision;$(ProjectDir)\lib\Engine\3D\Model;$(ProjectDir)lib\Engine\2D\Sprite;$(ProjectDir)lib\Engine\2D\Particle;$(ProjectDir)lib\Engine\2D;$(ProjectDir)lib\Engine\3D;$(ProjectDir)lib\Engine\Camera;$(ProjectDir)lib\Engine\Core;$(ProjectDir)lib\Engine\Math;$(ProjectDir)lib\Engine\Input;$(ProjectDir);$(ProjectDir)\Users\Scene;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <TreatWarningAsError>true</TreatWarningAsError>
+      <TreatWarningAsError>false</TreatWarningAsError>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <DisableSpecificWarnings>5045;4710;</DisableSpecificWarnings>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

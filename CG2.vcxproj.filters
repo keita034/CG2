@@ -91,6 +91,12 @@
     <Filter Include="Engine\ヘッダー ファイル\Collision">
       <UniqueIdentifier>{4b1dc927-e138-4910-9653-32b0f3a61c29}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Engine\ソース ファイル\Light">
+      <UniqueIdentifier>{c345c147-84de-4a1a-ba72-a3c6aac02bdd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\ヘッダー ファイル\Light">
+      <UniqueIdentifier>{7c47d42b-40bc-4aca-82b6-3c959900201c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -151,9 +157,6 @@
     <ClCompile Include="lib\Engine\Math\Vector4.cpp">
       <Filter>Engine\ソース ファイル\Math</Filter>
     </ClCompile>
-    <ClCompile Include="Users\Scene\GameScene.cpp">
-      <Filter>Users</Filter>
-    </ClCompile>
     <ClCompile Include="lib\Engine\3D\Model\ModelCone.cpp">
       <Filter>Engine\ソース ファイル\3D\Model</Filter>
     </ClCompile>
@@ -177,6 +180,18 @@
     </ClCompile>
     <ClCompile Include="lib\Engine\Collision\CollisionPrimitive.cpp">
       <Filter>Engine\ソース ファイル\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="Users\Scene\GameScene.cpp">
+      <Filter>Users\ソースファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\Engine\Light\Light.cpp">
+      <Filter>Engine\ソース ファイル\Light</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\Engine\3D\Model\Model.cpp">
+      <Filter>Engine\ソース ファイル\3D\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\Engine\3D\Model\ModelPipeLine.cpp">
+      <Filter>Engine\ソース ファイル\3D\Model</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -275,6 +290,12 @@
     </ClInclude>
     <ClInclude Include="lib\Engine\Collision\CollisionPrimitive.h">
       <Filter>Engine\ヘッダー ファイル\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\Engine\Light\Light.h">
+      <Filter>Engine\ヘッダー ファイル\Light</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\Engine\3D\Model\ModelPipeLine.h">
+      <Filter>Engine\ヘッダー ファイル\3D\Model</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

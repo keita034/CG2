@@ -2,6 +2,9 @@
 #include"ErrorException.h"
 #include"MyMath.h"
 #include"Camera.h"
+#include"ModelPipeLine.h"
+#include"DirectX12Core.h"
+#include"Light.h"
 
 enum class ModelShape
 {
@@ -10,6 +13,16 @@ enum class ModelShape
 	Capsule,//カプセル
 	Cylinder,//円柱
 	Cone,//円錐
+};
+
+enum ShaderType
+{
+	Default,
+	Flat,
+	Gouraud,
+	Lambert,
+	Phong,
+
 };
 
 class Model
@@ -38,7 +51,7 @@ protected:
 	//頂点バッファ
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertBuff;
 	//頂点マップ
-	PosUvColor* vertMap;
+	PosNormalUv* vertMap;
 	//頂点バッファビュー
 	D3D12_VERTEX_BUFFER_VIEW vbView{};
 	//インデックスバッファの生成
@@ -56,7 +69,7 @@ protected:
 	//定数バッファのGPUリソースのポインタ
 	Microsoft::WRL::ComPtr<ID3D12Resource> constBuffTransform;
 	//定数バッファのマッピング用ポインタ
-	ConstBufferDataTransform* constMapTransform = nullptr;
+	worldViewpojCamera* constMapTransform = nullptr;
 	char PADDING1[4];
 	//インデックスの数
 	UINT maxIndex;
@@ -65,12 +78,20 @@ protected:
 	UINT maxVert;
 	//ワールド行列
 	MyMath::Matrix4 matWorld;
-	//名前
-	const char* name = nullptr;
 	//頂点データ
-	std::vector<PosUvColor>vertices;
+	std::vector<PosNormalUv>vertices;
 	//頂点インデックス
 	std::vector<uint16_t> indices;
+	//頂点法線スムージング用データ
+	std::unordered_map<uint16_t, std::vector<uint16_t>>smoothData;
+	//ライト
+	static Light* light;
+	//マテリアル
+	Material material{};
+	//定数バッファマテリアル
+	Microsoft::WRL::ComPtr<ID3D12Resource> constBuffMaterial;
+	//定数バッファマテリアルのマッピング用ポインタ
+	ConstBuffDataMaterial* constMapMaterial = nullptr;
 
 
 public:
@@ -78,13 +99,13 @@ public:
 	/// <summary>
 	/// オブジェクト生成
 	/// </summary>
-	virtual void Create() = 0;
+	virtual void Create(bool smoothing)= 0;
 
 	/// <summary>
 	/// オブジェクト生成
 	/// </summary>
 	/// <param name="filePath">オブジェクトまでのファイルパス</param>
-	virtual void Create(const char* filePath) = 0;
+	virtual void Create(const char* filePath, bool smoothing) = 0;
 
 	/// <summary>
 	/// オブジェクトにテクスチャをセットする
@@ -99,7 +120,7 @@ public:
 	///<param name="rot">回転</param>
 	///<param name="scale">拡大率</param>
 	/// ///<param name="color"> カラー</param>
-	virtual void Update(const MyMath::Vector3& pos = { 0.0f, 0.0f, 0.0f }, const MyMath::Vector3& rot = { 0.0f, 0.0f, 0.0f }, const MyMath::Vector3& scale = { 1.0f,1.0f, 1.0f }, const MyMath::Vector4& color = { 1.0f,1.0f, 1.0f, 1.0f }) = 0;
+	virtual void Update(const MyMath::Vector3& pos = { 0.0f, 0.0f, 0.0f }, const MyMath::Vector3& rot = { 0.0f, 0.0f, 0.0f }, const MyMath::Vector3& scale = { 1.0f,1.0f, 1.0f }) = 0;
 
 	/// <summary>
 	/// 描画
@@ -116,20 +137,29 @@ public:
 	//初期化
 	virtual void Initialize(ModelShareVaria& modelShareVaria) = 0;
 
-	//初期化
-	virtual void Initialize(ModelShareVaria& modelShareVaria, ID3D12PipelineState* pipelineState_, ID3D12RootSignature* rootSignature_) = 0;
-
 	/// <summary>
 	/// 頂点座標を取得
 	/// </summary>
 	/// <returns>頂点座標配列</returns>
-	virtual const std::vector<PosUvColor>GetVertices() = 0;
+	virtual const std::vector<PosNormalUv>GetVertices() = 0;
 
 	/// <summary>
 	/// インデックスを取得
 	/// </summary>
 	/// <returns>インデックス座標配列</returns>
 	virtual const std::vector<uint16_t>GetIndices() = 0;
+
+	/// <summary>
+	/// シェーディング設定
+	/// </summary>
+	/// <param name="type">シェーディングタイプ</param>
+	virtual void SetShading(ShaderType type) = 0;
+
+	/// <summary>
+	/// ライトのセット
+	/// </summary>
+	/// <param name="light">ライト</param>
+	static void SetLight(Light* light_);
 
 	Model() = default;
 	virtual ~Model()= default;
@@ -142,7 +172,6 @@ protected:
 	virtual void CreatVertexIndexBuffer() = 0;
 	//テクスチャバッファ生成
 	virtual void CreatTextureBuffer() = 0;
-
 
 	//コピーコンストラクタ・代入演算子削除
 	Model& operator=(const Model&) = delete;

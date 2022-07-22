@@ -21,16 +21,6 @@ struct PosColor
 	MyMath::Vector4 color;//カラー
 };
 
-//パイプライン・ルートシグネチャセット
-struct PipelineSet
-{
-
-	//パイプラインステート
-	Microsoft::WRL::ComPtr<ID3D12PipelineState> pipelineState;
-	//ルートシグネチャ
-	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature;
-};
-
 //バッファ関連
 struct Buff
 {
@@ -162,6 +152,7 @@ public:
 	///<param name="radiusY">楕円の半径 Y</param>
 	///<param name="angle">楕円の回転角(rad)</param>
 	///<param name="color">楕円の色</param>
+	///<param name="fillFlag">: 四角形の中身を塗りつぶすかフラグ</param>
 	void DrawEllipse(float x, float y, float radiusX, float radiusY, float angle, MyMath::Vector4 color, int fillMode);
 
 	///<summary>
@@ -184,6 +175,13 @@ public:
 	///<param name="alpha">: 取得したい色の透過率 : 初期値255 (0～255)</param>
 	///<returns>色コード</returns>
 	MyMath::Vector4 GetColor(int red = 255, int blue = 255, int green = 255, int alpha = 255);
+
+	///<summary>
+	///色コードを取得する
+	///</summary>
+	///<param name="color">: 取得したい各色の輝度値 : 初期値255 (0～255)</param>
+	///<returns>色コード</returns>
+	MyMath::Vector4 GetColor(MyMath::Vector4 color);
 
 	/// <summary>
 	/// インスタンスを所得

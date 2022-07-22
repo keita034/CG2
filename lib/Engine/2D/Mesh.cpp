@@ -141,6 +141,19 @@ MyMath::Vector4 Mesh::GetColor(int red, int blue, int green, int alpha)
 	return color;
 }
 
+MyMath::Vector4 Mesh::GetColor(MyMath::Vector4 color)
+{
+	MyMath::Vector4 result{};
+
+	result.x = static_cast<float>(color.x) / 255.0f;
+	result.y = static_cast<float>(color.y) / 255.0f;
+	result.z = static_cast<float>(color.z) / 255.0f;
+	result.w = static_cast<float>(color.w) / 255.0f;
+
+	return result;
+}
+
+
 //コンストラクタ
 Mesh::Mesh()
 {

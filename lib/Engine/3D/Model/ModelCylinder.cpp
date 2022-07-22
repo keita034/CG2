@@ -8,8 +8,10 @@ ModelCylinder::~ModelCylinder()
 {
 }
 
-void ModelCylinder::Create()
+void ModelCylinder::Create(bool smoothing)
 {
+	static_cast<void>(smoothing);
+
 	maxIndex = cylinderMaxIndex;
 	maxVert = cylinderMaxVert;
 
@@ -18,6 +20,14 @@ void ModelCylinder::Create()
 
 	//定数バッファ生成(3D座標変換行列)
 	DirectX12Core::GetInstance()->CreateConstBuff(constMapTransform, constBuffTransform);
+
+	//定数バッファ生成(マテリアル)
+	DirectX12Core::GetInstance()->CreateConstBuff(constMapMaterial, constBuffMaterial);
+	MyMath::Vector3 one = { 1.0f,1.0f,1.0f };
+	constMapMaterial->ambient = one;
+	constMapMaterial->diffuse = one;
+	constMapMaterial->specular = one;
+	constMapMaterial->alpha = material.alpha;
 
 	// 頂点データ
 	constexpr UINT NumDiv = 32; // 分割数
@@ -50,16 +60,16 @@ void ModelCylinder::Create()
 	(*pointsU.rbegin()) = (*pointsU.begin());
 	(*pointsV.rbegin()) = (*pointsV.begin());
 
-	PosUvColor tmp;
+	PosNormalUv tmp;
 
 	//計算した値を代入
 	for (size_t i = 0; i < NumDiv; i++)
 	{
-		tmp = {{ pointsX[i],1.0f,pointsZ[i] },{},{ pointsV[i],pointsU[i] } ,{ 1.0f,1.0f,1.0f,1.0f }};
+		tmp = {{ pointsX[i],1.0f,pointsZ[i] },{},{ pointsV[i],pointsU[i] } };
 		vertices.push_back(tmp);
 	}
 
-	tmp = { { 0.0f,1.0f,0.0f },{},{ 0.75f,0.75f },{ 1.0f,1.0f,1.0f,1.0f } };
+	tmp = { { 0.0f,1.0f,0.0f },{},{ 0.75f,0.75f } };
 	vertices.push_back(tmp);
 
 	//下側の計算
@@ -78,11 +88,11 @@ void ModelCylinder::Create()
 	//計算した値を代入
 	for (size_t i = 0; i < static_cast<size_t>(NumDiv); i++)
 	{
-		tmp = { { pointsX[i],-1.0f,pointsZ[i] },{},{ pointsU[i],pointsV[i] },{ 1.0f,1.0f,1.0f,1.0f } };
+		tmp = { { pointsX[i],-1.0f,pointsZ[i] },{},{ pointsU[i],pointsV[i] }, };
 		vertices.push_back(tmp);
 	}
 
-	tmp = { { 0.0f,-1.0f,0.0f },{},{ 0.25f,0.75f },{ 1.0f,1.0f,1.0f,1.0f } };
+	tmp = { { 0.0f,-1.0f,0.0f },{},{ 0.25f,0.75f } };
 	vertices.push_back(tmp);
 
 	//UV座標の計算
@@ -96,7 +106,7 @@ void ModelCylinder::Create()
 	//計算した値を代入
 	for (size_t i = 0; i < static_cast<size_t>(NumDiv + 1); i++)
 	{
-		tmp = { { pointsX[i],-1.0f,pointsZ[i] },{},{ pointsU[i],pointsV[i] },{ 1.0f,1.0f,1.0f,1.0f } };
+		tmp = { { pointsX[i],-1.0f,pointsZ[i] },{},{ pointsU[i],pointsV[i] } };
 		vertices.push_back(tmp);
 	}
 
@@ -112,7 +122,7 @@ void ModelCylinder::Create()
 	//計算した値を代入
 	for (size_t i = 0; i < static_cast<size_t>(NumDiv + 1); i++)
 	{
-		tmp = { { pointsX[i],1.0f,pointsZ[i] },{},{ pointsU[i],pointsV[i] },{ 1.0f,1.0f,1.0f,1.0f } };
+		tmp = { { pointsX[i],1.0f,pointsZ[i] },{},{ pointsU[i],pointsV[i] } };
 		vertices.push_back(tmp);
 	}
 
@@ -318,13 +328,8 @@ void ModelCylinder::SetTexture(const wchar_t* filePath)
 	CreateShaderResourceView();
 }
 
-void ModelCylinder::Update(const MyMath::Vector3& pos, const MyMath::Vector3& rot, const MyMath::Vector3& scale, const MyMath::Vector4& color)
+void ModelCylinder::Update(const MyMath::Vector3& pos, const MyMath::Vector3& rot, const MyMath::Vector3& scale)
 {
-	//カラー
-	for (int i = 0; i < 4; i++)
-	{
-		vertMap[i].color = color;
-	}
 
 	MyMath::Matrix4 mTrans, mRot, mScale;
 	//平行移動行列
@@ -342,7 +347,9 @@ void ModelCylinder::Draw(Camera* camera)
 {
 	assert(camera);
 
-	constMapTransform->mat = matWorld * camera->GetViewMatrixInv() * camera->GetProjectionMatrix();
+	constMapTransform->matWorld = matWorld * camera->GetViewMatrixInv() * camera->GetProjectionMatrix();
+	constMapTransform->world = matWorld;
+	constMapTransform->cameraPos = camera->GetPosition();
 
 	// パイプラインステートとルートシグネチャの設定コマンド
 	cmdList->SetPipelineState(pipelineState.Get());
@@ -359,12 +366,14 @@ void ModelCylinder::Draw(Camera* camera)
 
 	// 定数バッファビュー(CBV)の設定コマンド
 	cmdList->SetGraphicsRootConstantBufferView(0, constBuffTransform->GetGPUVirtualAddress());
+	cmdList->SetGraphicsRootConstantBufferView(1, constBuffMaterial->GetGPUVirtualAddress());
+	light->SetConstBufferView(cmdList.Get(), 3);
 
 	// SRVヒープの設定コマンド
 	cmdList->SetDescriptorHeaps(1, srvHeap.GetAddressOf());
 
 	// SRVヒープの先頭にあるSRVをルートパラメータ1番に設定
-	cmdList->SetGraphicsRootDescriptorTable(1, gpuHandle);
+	cmdList->SetGraphicsRootDescriptorTable(2, gpuHandle);
 
 	// 描画コマンド
 	cmdList->DrawIndexedInstanced(maxIndex, 1, 0, 0, 0);
@@ -380,6 +389,32 @@ MyMath::Matrix4& ModelCylinder::GetMatWorld()
 const std::vector<uint16_t> ModelCylinder::GetIndices()
 {
 	return indices;
+}
+
+void ModelCylinder::SetShading(ShaderType type)
+{
+	ModelPipeLine* pipeline = ModelPipeLine::GetInstance();
+	switch (type)
+	{
+	case Default:
+		pipelineState = pipeline->GetDefaultPipeline()->pipelineState;
+		rootSignature = pipeline->GetDefaultPipeline()->rootSignature;
+		break;
+	case Flat:
+		break;
+	case Gouraud:
+		break;
+	case Lambert:
+		pipelineState = pipeline->GetLambertPipeline()->pipelineState;
+		rootSignature = pipeline->GetLambertPipeline()->rootSignature;
+		break;
+	case Phong:
+		pipelineState = pipeline->GetPhongPipeline()->pipelineState;
+		rootSignature = pipeline->GetPhongPipeline()->rootSignature;
+		break;
+	default:
+		break;
+	}
 }
 
 void ModelCylinder::CreateShaderResourceView()
@@ -413,7 +448,7 @@ void ModelCylinder::CreatVertexIndexBuffer()
 	D3D12_RESOURCE_DESC resDesc{};
 
 	// 頂点データ全体のサイズ = 頂点データ一つ分のサイズ * 頂点データの要素数
-	UINT sizeVB = static_cast<UINT>(sizeof(PosUvColor) * maxVert);
+	UINT sizeVB = static_cast<UINT>(sizeof(PosNormalUv) * maxVert);
 
 	// 頂点バッファの設定
 	heapProp.Type = D3D12_HEAP_TYPE_UPLOAD; // GPUへの転送用
@@ -446,7 +481,7 @@ void ModelCylinder::CreatVertexIndexBuffer()
 	// 頂点バッファのサイズ
 	vbView.SizeInBytes = sizeVB;
 	// 頂点１つ分のデータサイズ
-	vbView.StrideInBytes = sizeof(PosUvColor);
+	vbView.StrideInBytes = sizeof(PosNormalUv);
 
 	// インデックスデータのサイズ
 	UINT sizeIB = static_cast<UINT>(sizeof(uint16_t) * maxIndex);
@@ -526,21 +561,10 @@ void ModelCylinder::CreatTextureBuffer()
 	}
 }
 
-void ModelCylinder::Create(const char* filePath)
+void ModelCylinder::Create(const char* filePath,bool smoothing)
 {
-	MyMath::getFileNames(filePath);
-};
-
-void ModelCylinder::Initialize(ModelShareVaria& modelShareVaria, ID3D12PipelineState* pipelineState_, ID3D12RootSignature* rootSignature_)
-{
-	device = DirectX12Core::GetInstance()->GetDevice();
-	cmdList = DirectX12Core::GetInstance()->GetCommandList();
-
-	descriptorRange = modelShareVaria.descriptorRange;
-	nextIndex = modelShareVaria.nextIndex;
-	pipelineState = pipelineState_;
-	rootSignature = rootSignature_;
-	srvHeap = modelShareVaria.srvHeap;
+	static_cast<void>(filePath);
+	static_cast<void>(smoothing);
 };
 
 void ModelCylinder::Initialize(ModelShareVaria& modelShareVaria)
@@ -559,7 +583,7 @@ void ModelCylinder::Initialize(ModelShareVaria& modelShareVaria)
 
 }
 
-const std::vector<PosUvColor> ModelCylinder::GetVertices()
+const std::vector<PosNormalUv> ModelCylinder::GetVertices()
 {
 	return vertices;
 }

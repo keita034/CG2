@@ -1,6 +1,5 @@
 #pragma once
 #include "Model.h"
-#include"DirectX12Core.h"
 
 class ModelCylinder : public Model
 {
@@ -17,7 +16,7 @@ public:
 	/// <summary>
 	/// オブジェクト生成
 	/// </summary>
-	virtual void Create()override;
+	virtual void Create(bool smoothing = false)override;
 
 	/// <summary>
 	/// オブジェクトにテクスチャをセットする
@@ -32,7 +31,7 @@ public:
 	///<param name="rot">回転</param>
 	///<param name="scale">拡大率</param>
 	/// ///<param name="color"> カラー</param>
-	virtual void Update(const MyMath::Vector3& pos = { 0.0f, 0.0f, 0.0f }, const MyMath::Vector3& rot = { 0.0f, 0.0f, 0.0f }, const MyMath::Vector3& scale = { 1.0f,1.0f, 1.0f }, const MyMath::Vector4& color = { 1.0f,1.0f, 1.0f, 1.0f })override;
+	virtual void Update(const MyMath::Vector3& pos = { 0.0f, 0.0f, 0.0f }, const MyMath::Vector3& rot = { 0.0f, 0.0f, 0.0f }, const MyMath::Vector3& scale = { 1.0f,1.0f, 1.0f })override;
 
 	/// <summary>
 	/// 描画
@@ -52,7 +51,7 @@ public:
 	/// 頂点座標を取得
 	/// </summary>
 	/// <returns>頂点座標配列</returns>
-	virtual const std::vector<PosUvColor>GetVertices()override;
+	virtual const std::vector<PosNormalUv>GetVertices()override;
 
 	/// <summary>
 	/// インデックスを取得
@@ -60,6 +59,11 @@ public:
 	/// <returns>インデックス座標配列</returns>
 	virtual const std::vector<uint16_t>GetIndices()override;
 
+	/// <summary>
+	/// シェーディング設定
+	/// </summary>
+	/// <param name="type">シェーディングタイプ</param>
+	virtual	void SetShading(ShaderType type)override;
 private:
 
 	//シェーダ－リソースビュー生成
@@ -69,9 +73,7 @@ private:
 	//テクスチャバッファ生成
 	virtual void CreatTextureBuffer()override;
 
-	virtual void Create(const char* filePath);
-
-	void Initialize(ModelShareVaria& modelShareVaria, ID3D12PipelineState* pipelineState_, ID3D12RootSignature* rootSignature_)override;
+	virtual void Create(const char* filePath, bool smoothing = false);
 
 	//コピーコンストラクタ・代入演算子削除
 	ModelCylinder& operator=(const ModelCylinder&) = delete;

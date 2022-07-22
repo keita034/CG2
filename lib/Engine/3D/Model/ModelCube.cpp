@@ -9,73 +9,82 @@ ModelCube::~ModelCube()
 {
 }
 
-void ModelCube::Create()
+void ModelCube::Create(bool smoothing)
 {
+	static_cast<void>(smoothing);
 	//頂点バッファ・インデックス生成
 	CreatVertexIndexBuffer();
 
 	//定数バッファ生成(3D座標変換行列)
 	DirectX12Core::GetInstance()->CreateConstBuff(constMapTransform, constBuffTransform);
 
+	//定数バッファ生成(マテリアル)
+	DirectX12Core::GetInstance()->CreateConstBuff(constMapMaterial, constBuffMaterial);
+	MyMath::Vector3 one = { 1.0f,1.0f,1.0f };
+	constMapMaterial->ambient = one;
+	constMapMaterial->diffuse = one;
+	constMapMaterial->specular = one;
+	constMapMaterial->alpha = material.alpha;
+
 	// 頂点データ
 	//正面
-	PosUvColor tmp = { { -1.0f, -1.0f, -1.0f }, {}, { 0.0f, 1.0f }, { 1.0f,1.0f,1.0f,1.0f } };//左上インデックス0
+	PosNormalUv tmp = { { -1.0f, -1.0f, -1.0f }, {}, { 0.0f, 1.0f } };//左上インデックス0
 	vertices.push_back(tmp);
-	tmp = { {-1.0f, 1.0f,-1.0f},{},{ 0.0f, 0.0f},{1.0f,1.0f,1.0f,1.0f} };//左下インデックス1
+	tmp = { {-1.0f, 1.0f,-1.0f},{},{ 0.0f, 0.0f} };//左下インデックス1
 	vertices.push_back(tmp);
-	tmp = { { 1.0f,-1.0f,-1.0f},{},{ 1.0f, 1.0f},{1.0f,1.0f,1.0f,1.0f} };//右上インデックス2
+	tmp = { { 1.0f,-1.0f,-1.0f},{},{ 1.0f, 1.0f} };//右上インデックス2
 	vertices.push_back(tmp);
-	tmp = { { 1.0f, 1.0f,-1.0f},{},{ 1.0f, 0.0f},{1.0f,1.0f,1.0f,1.0f} };//右下インデックス3
+	tmp = { { 1.0f, 1.0f,-1.0f},{},{ 1.0f, 0.0f} };//右下インデックス3
 	vertices.push_back(tmp);
 
 	//右
-	tmp = { { 1.0f,-1.0f,-1.0f},{},{ 0.0f, 1.0f},{1.0f,1.0f,1.0f,1.0f} };//左上インデックス4
+	tmp = { { 1.0f,-1.0f,-1.0f},{},{ 0.0f, 1.0f} };//左上インデックス4
 	vertices.push_back(tmp);
-	tmp = { { 1.0f, 1.0f,-1.0f},{},{ 0.0f, 0.0f},{1.0f,1.0f,1.0f,1.0f} };//左下インデックス5
+	tmp = { { 1.0f, 1.0f,-1.0f},{},{ 0.0f, 0.0f} };//左下インデックス5
 	vertices.push_back(tmp);
-	tmp = { { 1.0f,-1.0f, 1.0f},{},{ 1.0f, 1.0f},{1.0f,1.0f,1.0f,1.0f} };//右上インデックス6
+	tmp = { { 1.0f,-1.0f, 1.0f},{},{ 1.0f, 1.0f} };//右上インデックス6
 	vertices.push_back(tmp);
-	tmp = { { 1.0f, 1.0f, 1.0f},{},{ 1.0f, 0.0f},{1.0f,1.0f,1.0f,1.0f} };//右下インデックス7
+	tmp = { { 1.0f, 1.0f, 1.0f},{},{ 1.0f, 0.0f} };//右下インデックス7
 	vertices.push_back(tmp);
 
 	//左
-	tmp = { {-1.0f,-1.0f, 1.0f},{},{ 0.0f, 1.0f},{1.0f,1.0f,1.0f,1.0f} };//左上インデックス8
+	tmp = { {-1.0f,-1.0f, 1.0f},{},{ 0.0f, 1.0f} };//左上インデックス8
 	vertices.push_back(tmp);
-	tmp = { {-1.0f, 1.0f, 1.0f},{},{ 0.0f, 0.0f},{1.0f,1.0f,1.0f,1.0f} };//左下インデックス9
+	tmp = { {-1.0f, 1.0f, 1.0f},{},{ 0.0f, 0.0f} };//左下インデックス9
 	vertices.push_back(tmp);
-	tmp = { {-1.0f,-1.0f,-1.0f},{},{ 1.0f, 1.0f},{1.0f,1.0f,1.0f,1.0f} };//右上インデックス10
+	tmp = { {-1.0f,-1.0f,-1.0f},{},{ 1.0f, 1.0f} };//右上インデックス10
 	vertices.push_back(tmp);
-	tmp = { {-1.0f, 1.0f,-1.0f},{},{ 1.0f, 0.0f},{1.0f,1.0f,1.0f,1.0f} };//右下インデックス11
+	tmp = { {-1.0f, 1.0f,-1.0f},{},{ 1.0f, 0.0f} };//右下インデックス11
 	vertices.push_back(tmp);
 	
 	//裏
-	tmp = { { 1.0f,-1.0f, 1.0f},{},{ 0.0f, 1.0f},{1.0f,1.0f,1.0f,1.0f} };//左上インデックス12
+	tmp = { { 1.0f,-1.0f, 1.0f},{},{ 0.0f, 1.0f} };//左上インデックス12
 	vertices.push_back(tmp);
-	tmp = { { 1.0f, 1.0f, 1.0f},{},{ 0.0f, 0.0f},{1.0f,1.0f,1.0f,1.0f} };//左下インデックス13
+	tmp = { { 1.0f, 1.0f, 1.0f},{},{ 0.0f, 0.0f} };//左下インデックス13
 	vertices.push_back(tmp);
-	tmp = { {-1.0f,-1.0f, 1.0f},{},{ 1.0f, 1.0f},{1.0f,1.0f,1.0f,1.0f} };//右上インデックス14
+	tmp = { {-1.0f,-1.0f, 1.0f},{},{ 1.0f, 1.0f} };//右上インデックス14
 	vertices.push_back(tmp);
-	tmp = { {-1.0f, 1.0f, 1.0f},{},{ 1.0f, 0.0f},{1.0f,1.0f,1.0f,1.0f} };//右下インデックス15
+	tmp = { {-1.0f, 1.0f, 1.0f},{},{ 1.0f, 0.0f} };//右下インデックス15
 	vertices.push_back(tmp);
 
 	//上
-	tmp = { {-1.0f, 1.0f,-1.0f},{},{ 0.0f, 1.0f},{1.0f,1.0f,1.0f,1.0f} };//左上インデックス16
+	tmp = { {-1.0f, 1.0f,-1.0f},{},{ 0.0f, 1.0f} };//左上インデックス16
 	vertices.push_back(tmp);
-	tmp = { {-1.0f, 1.0f, 1.0f},{},{ 0.0f, 0.0f},{1.0f,1.0f,1.0f,1.0f} };//左下インデックス17
+	tmp = { {-1.0f, 1.0f, 1.0f},{},{ 0.0f, 0.0f} };//左下インデックス17
 	vertices.push_back(tmp);
-	tmp = { { 1.0f, 1.0f,-1.0f},{},{ 1.0f, 1.0f},{1.0f,1.0f,1.0f,1.0f} };//右上インデックス18
+	tmp = { { 1.0f, 1.0f,-1.0f},{},{ 1.0f, 1.0f} };//右上インデックス18
 	vertices.push_back(tmp);
-	tmp = { { 1.0f, 1.0f, 1.0f},{},{ 1.0f, 0.0f},{1.0f,1.0f,1.0f,1.0f} };//右下インデックス19
+	tmp = { { 1.0f, 1.0f, 1.0f},{},{ 1.0f, 0.0f} };//右下インデックス19
 	vertices.push_back(tmp);
 
 	//底
-	tmp = { {-1.0f,-1.0f, 1.0f},{},{ 0.0f, 1.0f},{1.0f,1.0f,1.0f,1.0f} };//左上インデックス20
+	tmp = { {-1.0f,-1.0f, 1.0f},{},{ 0.0f, 1.0f} };//左上インデックス20
 	vertices.push_back(tmp);
-	tmp = { {-1.0f,-1.0f,-1.0f},{},{ 0.0f, 0.0f},{1.0f,1.0f,1.0f,1.0f} };//左下インデックス21
+	tmp = { {-1.0f,-1.0f,-1.0f},{},{ 0.0f, 0.0f} };//左下インデックス21
 	vertices.push_back(tmp);
-	tmp = { { 1.0f,-1.0f, 1.0f},{},{ 1.0f, 1.0f},{1.0f,1.0f,1.0f,1.0f} };//右上インデックス22
+	tmp = { { 1.0f,-1.0f, 1.0f},{},{ 1.0f, 1.0f} };//右上インデックス22
 	vertices.push_back(tmp);
-	tmp = { { 1.0f,-1.0f,-1.0f},{},{ 1.0f, 0.0f},{1.0f,1.0f,1.0f,1.0f} };//右下インデックス23
+	tmp = { { 1.0f,-1.0f,-1.0f},{},{ 1.0f, 0.0f} };//右下インデックス23
 	vertices.push_back(tmp);
 
 // インデックスデータ
@@ -172,13 +181,8 @@ void ModelCube::SetTexture(const wchar_t* filePath)
 	CreateShaderResourceView();
 }
 
-void ModelCube::Update(const MyMath::Vector3& pos, const MyMath::Vector3& rot, const MyMath::Vector3& scale, const MyMath::Vector4& color)
+void ModelCube::Update(const MyMath::Vector3& pos, const MyMath::Vector3& rot, const MyMath::Vector3& scale)
 {
-	//カラー
-	for (int i = 0; i < 4; i++)
-	{
-		vertMap[i].color = color;
-	}
 
 	MyMath::Matrix4 mTrans, mRot, mScale;
 	//平行移動行列
@@ -201,7 +205,11 @@ MyMath::Matrix4& ModelCube::GetMatWorld()
 void ModelCube::Draw(Camera* camera)
 {
 	assert(camera);
-	constMapTransform->mat = matWorld * camera->GetViewMatrixInv() * camera->GetProjectionMatrix();
+	constMapTransform->matWorld = matWorld * camera->GetViewMatrixInv() * camera->GetProjectionMatrix();
+	constMapTransform->world = matWorld;
+	constMapTransform->cameraPos = camera->GetPosition();
+
+	light->SetConstBufferView(cmdList.Get(), 3);
 
 	// パイプラインステートとルートシグネチャの設定コマンド
 	cmdList->SetPipelineState(pipelineState.Get());
@@ -218,12 +226,14 @@ void ModelCube::Draw(Camera* camera)
 
 	// 定数バッファビュー(CBV)の設定コマンド
 	cmdList->SetGraphicsRootConstantBufferView(0, constBuffTransform->GetGPUVirtualAddress());
+	cmdList->SetGraphicsRootConstantBufferView(1, constBuffMaterial->GetGPUVirtualAddress());
+	light->SetConstBufferView(cmdList.Get(), 3);
 
 	// SRVヒープの設定コマンド
 	cmdList->SetDescriptorHeaps(1, srvHeap.GetAddressOf());
 
 	// SRVヒープの先頭にあるSRVをルートパラメータ1番に設定
-	cmdList->SetGraphicsRootDescriptorTable(1, gpuHandle);
+	cmdList->SetGraphicsRootDescriptorTable(2, gpuHandle);
 
 	// 描画コマンド
 	cmdList->DrawIndexedInstanced(maxIndex, 1, 0, 0, 0);
@@ -233,6 +243,32 @@ void ModelCube::Draw(Camera* camera)
 const std::vector<uint16_t> ModelCube::GetIndices()
 {
 	return indices;
+}
+
+void ModelCube::SetShading(ShaderType type)
+{
+	ModelPipeLine* pipeline = ModelPipeLine::GetInstance();
+	switch (type)
+	{
+	case Default:
+		pipelineState = pipeline->GetDefaultPipeline()->pipelineState;
+		rootSignature = pipeline->GetDefaultPipeline()->rootSignature;
+		break;
+	case Flat:
+		break;
+	case Gouraud:
+		break;
+	case Lambert:
+		pipelineState = pipeline->GetLambertPipeline()->pipelineState;
+		rootSignature = pipeline->GetLambertPipeline()->rootSignature;
+		break;
+	case Phong:
+		pipelineState = pipeline->GetPhongPipeline()->pipelineState;
+		rootSignature = pipeline->GetPhongPipeline()->rootSignature;
+		break;
+	default:
+		break;
+	}
 }
 
 void ModelCube::CreateShaderResourceView()
@@ -266,7 +302,7 @@ void ModelCube::CreatVertexIndexBuffer()
 	D3D12_RESOURCE_DESC resDesc{};
 
 	// 頂点データ全体のサイズ = 頂点データ一つ分のサイズ * 頂点データの要素数
-	UINT sizeVB = static_cast<UINT>(sizeof(PosUvColor) * maxVert);
+	UINT sizeVB = static_cast<UINT>(sizeof(PosNormalUv) * maxVert);
 
 	// 頂点バッファの設定
 	heapProp.Type = D3D12_HEAP_TYPE_UPLOAD; // GPUへの転送用
@@ -299,7 +335,7 @@ void ModelCube::CreatVertexIndexBuffer()
 	// 頂点バッファのサイズ
 	vbView.SizeInBytes = sizeVB;
 	// 頂点１つ分のデータサイズ
-	vbView.StrideInBytes = sizeof(PosUvColor);
+	vbView.StrideInBytes = sizeof(PosNormalUv);
 
 	// インデックスデータのサイズ
 	UINT sizeIB = static_cast<UINT>(sizeof(uint16_t) * maxIndex);
@@ -379,22 +415,11 @@ void ModelCube::CreatTextureBuffer()
 	}
 }
 
-void ModelCube::Create(const char* filePath)
+void ModelCube::Create(const char* filePath, bool smoothing)
 {
-	MyMath::getFileNames(filePath);
+	static_cast<void>(filePath);
+	static_cast<void>(smoothing);
 }
-
-void ModelCube::Initialize(ModelShareVaria& modelShareVaria, ID3D12PipelineState* pipelineState_, ID3D12RootSignature* rootSignature_)
-{
-	device = DirectX12Core::GetInstance()->GetDevice();
-	cmdList = DirectX12Core::GetInstance()->GetCommandList();
-
-	descriptorRange = modelShareVaria.descriptorRange;
-	nextIndex = modelShareVaria.nextIndex;
-	pipelineState = pipelineState_;
-	rootSignature = rootSignature_;
-	srvHeap = modelShareVaria.srvHeap;
-};
 
 void ModelCube::Initialize(ModelShareVaria& modelShareVaria)
 {
@@ -412,7 +437,7 @@ void ModelCube::Initialize(ModelShareVaria& modelShareVaria)
 
 }
 
-const std::vector<PosUvColor> ModelCube::GetVertices()
+const std::vector<PosNormalUv> ModelCube::GetVertices()
 {
 	return vertices;
 }

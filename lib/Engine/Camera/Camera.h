@@ -34,7 +34,7 @@ private:
 	MyMath::Vector3 up = { 0.0f,1.0f,0.0f };
 
 	//画角(ラジアン度)
-	float fovAngleY = 0.0f;
+	float fovAngleY = 0.0;
 	//アスペクト比(画面横幅/画面縦幅)
 	float aspect = 0.0f;
 	//ニアクリップ(前端)
@@ -160,7 +160,7 @@ public:
 	/// <remarks>
 	/// SetUpdateProjMatrixFuncでenUpdateProjMatrixFunc_Perspectiveが設定されているときに使用される。
 	/// </remarks>
-	/// <param name="viewAngle">画角。単位ラジアン</param>
+	/// <param name="viewAngle">画角、単位ラジアン</param>
 	void SetFovAngleY(float fovAngle);
 
 	/// <summary>

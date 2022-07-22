@@ -20,6 +20,7 @@ Sprite* SpriteCreat::CreateSprite(const wchar_t* filePath, bool flag3d)
 		Sprite* s3D = new Sprite3D;
 		s3D->Initialize(modelShareVaria);
 		s3D->Load(filePath);
+		modelShareVaria.nextIndex++;
 		return s3D;
 	}
 	else
@@ -27,6 +28,7 @@ Sprite* SpriteCreat::CreateSprite(const wchar_t* filePath, bool flag3d)
 		Sprite* s2D = new Sprite2D;
 		s2D->Initialize(modelShareVaria);
 		s2D->Load(filePath);
+		modelShareVaria.nextIndex++;
 		return s2D;
 	}
 }
@@ -95,11 +97,9 @@ void SpriteCreat::CreatPipeline()
 	{
 		// xyz座標
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,D3D12_APPEND_ALIGNED_ELEMENT,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
-		//法線ベクトル
-		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,D3D12_APPEND_ALIGNED_ELEMENT,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
 		// uv座標
 		{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0,D3D12_APPEND_ALIGNED_ELEMENT,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
-
+		//カラー
 		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0,D3D12_APPEND_ALIGNED_ELEMENT,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
 	};
 

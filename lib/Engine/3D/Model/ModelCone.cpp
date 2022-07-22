@@ -9,13 +9,22 @@ ModelCone::~ModelCone()
 {
 }
 
-void ModelCone::Create()
+void ModelCone::Create(bool smoothing)
 {
+	static_cast<void>(smoothing);
+
 	//頂点バッファ・インデックス生成
 	CreatVertexIndexBuffer();
 
 	//定数バッファ生成(3D座標変換行列)
 	DirectX12Core::GetInstance()->CreateConstBuff(constMapTransform, constBuffTransform);
+
+	//定数バッファ生成(マテリアル)
+	DirectX12Core::GetInstance()->CreateConstBuff(constMapMaterial, constBuffMaterial);
+	MyMath::Vector3 one = { 1.0f,1.0f,1.0f };
+	constMapMaterial->ambient = one;
+	constMapMaterial->diffuse = one;
+	constMapMaterial->specular = one;
 
 	// 頂点データ
 	constexpr UINT NumDiv = 32; // 分割数
@@ -52,15 +61,15 @@ void ModelCone::Create()
 	(*pointsU.rbegin()) = (*pointsU.begin());
 	(*pointsV.rbegin()) = (*pointsV.begin());
 
-	PosUvColor tmp{};
+	PosNormalUv tmp{};
 	//計算した値を代入
 	for (size_t i = 0; i < static_cast<size_t>(NumDiv + 1.0f); i++)
 	{
-		tmp = {{ pointsX[i],-1.0f,pointsZ[i] },{},{ pointsU[i],pointsV[i]},{1.0f,1.0f,1.0f,1.0f}};
+		tmp = {{ pointsX[i],-1.0f,pointsZ[i] },{},{ pointsU[i],pointsV[i]}};
 		vertices.push_back(tmp);
 	}
 
-	tmp = {{ 0.0f,1.0f,0.0f },{},{ 0.25f,0.5f },{1.0f,1.0f,1.0f,1.0f} };
+	tmp = {{ 0.0f,1.0f,0.0f },{},{ 0.25f,0.5f } };
 	vertices.push_back(tmp);
 
 	//下側の計算
@@ -79,11 +88,11 @@ void ModelCone::Create()
 	//計算した値を代入
 	for (size_t i = 1; i < static_cast<size_t>(NumDiv + 1.0f); i++)
 	{
-		tmp = { { pointsX[i],-1.0f,pointsZ[i] },{},{ pointsU[i],pointsV[i]},{1.0f,1.0f,1.0f,1.0f} };
+		tmp = { { pointsX[i],-1.0f,pointsZ[i] },{},{ pointsU[i],pointsV[i]} };
 		vertices.push_back(tmp);
 	}
 
-	tmp = { { 0.0f,-1.0f,0.0f },{},{ 0.75f,0.5 },{1.0f,1.0f,1.0f,1.0f} };
+	tmp = { { 0.0f,-1.0f,0.0f },{},{ 0.75f,0.5 } };
 	vertices.push_back(tmp);
 
 	// インデックスデータ
@@ -211,13 +220,8 @@ void ModelCone::SetTexture(const wchar_t* filePath)
 	CreateShaderResourceView();
 }
 
-void ModelCone::Update(const MyMath::Vector3& pos, const MyMath::Vector3& rot, const MyMath::Vector3& scale, const MyMath::Vector4& color)
+void ModelCone::Update(const MyMath::Vector3& pos, const MyMath::Vector3& rot, const MyMath::Vector3& scale)
 {
-	//カラー
-	for (int i = 0; i < 4; i++)
-	{
-		vertMap[i].color = color;
-	}
 
 	MyMath::Matrix4 mTrans, mRot, mScale;
 	//平行移動行列
@@ -233,8 +237,11 @@ void ModelCone::Update(const MyMath::Vector3& pos, const MyMath::Vector3& rot, c
 void ModelCone::Draw(Camera* camera)
 {
 	assert(camera);
+	constMapTransform->matWorld = matWorld * camera->GetViewMatrixInv() * camera->GetProjectionMatrix();
+	constMapTransform->world = matWorld;
+	constMapTransform->cameraPos = camera->GetPosition();
 
-	constMapTransform->mat = matWorld * camera->GetViewMatrixInv() * camera->GetProjectionMatrix();
+	light->SetConstBufferView(cmdList.Get(), 3);
 
 	// パイプラインステートとルートシグネチャの設定コマンド
 	cmdList->SetPipelineState(pipelineState.Get());
@@ -256,7 +263,7 @@ void ModelCone::Draw(Camera* camera)
 	cmdList->SetDescriptorHeaps(1, srvHeap.GetAddressOf());
 
 	// SRVヒープの先頭にあるSRVをルートパラメータ1番に設定
-	cmdList->SetGraphicsRootDescriptorTable(1, gpuHandle);
+	cmdList->SetGraphicsRootDescriptorTable(2, gpuHandle);
 
 	// 描画コマンド
 	cmdList->DrawIndexedInstanced(maxIndex, 1, 0, 0, 0);
@@ -273,6 +280,32 @@ const std::vector<uint16_t> ModelCone::GetIndices()
 	return indices;
 }
 
+
+void ModelCone::SetShading(ShaderType type)
+{
+	ModelPipeLine* pipeline = ModelPipeLine::GetInstance();
+	switch (type)
+	{
+	case Default:
+		pipelineState = pipeline->GetDefaultPipeline()->pipelineState;
+		rootSignature = pipeline->GetDefaultPipeline()->rootSignature;
+		break;
+	case Flat:
+		break;
+	case Gouraud:
+		break;
+	case Lambert:
+		pipelineState = pipeline->GetLambertPipeline()->pipelineState;
+		rootSignature = pipeline->GetLambertPipeline()->rootSignature;
+		break;
+	case Phong:
+		pipelineState = pipeline->GetPhongPipeline()->pipelineState;
+		rootSignature = pipeline->GetPhongPipeline()->rootSignature;
+		break;
+	default:
+		break;
+	}
+}
 
 void ModelCone::CreateShaderResourceView()
 {
@@ -305,7 +338,7 @@ void ModelCone::CreatVertexIndexBuffer()
 	D3D12_RESOURCE_DESC resDesc{};
 
 	// 頂点データ全体のサイズ = 頂点データ一つ分のサイズ * 頂点データの要素数
-	UINT sizeVB = static_cast<UINT>(sizeof(PosUvColor) * maxVert);
+	UINT sizeVB = static_cast<UINT>(sizeof(PosNormalUv) * maxVert);
 
 	// 頂点バッファの設定
 	heapProp.Type = D3D12_HEAP_TYPE_UPLOAD; // GPUへの転送用
@@ -338,7 +371,7 @@ void ModelCone::CreatVertexIndexBuffer()
 	// 頂点バッファのサイズ
 	vbView.SizeInBytes = sizeVB;
 	// 頂点１つ分のデータサイズ
-	vbView.StrideInBytes = sizeof(PosUvColor);
+	vbView.StrideInBytes = sizeof(PosNormalUv);
 
 	// インデックスデータのサイズ
 	UINT sizeIB = static_cast<UINT>(sizeof(uint16_t) * maxIndex);
@@ -418,22 +451,13 @@ void ModelCone::CreatTextureBuffer()
 	}
 }
 
-void ModelCone::Create(const char* filePath)
+void ModelCone::Create(const char* filePath, bool smoothing)
 {
-	MyMath::getFileNames(filePath);
+	static_cast<void>(filePath);
+	static_cast<void>(smoothing);
 }
 
-void ModelCone::Initialize(ModelShareVaria& modelShareVaria, ID3D12PipelineState* pipelineState_, ID3D12RootSignature* rootSignature_)
-{
-	device = DirectX12Core::GetInstance()->GetDevice();
-	cmdList = DirectX12Core::GetInstance()->GetCommandList();
 
-	descriptorRange = modelShareVaria.descriptorRange;
-	nextIndex = modelShareVaria.nextIndex;
-	pipelineState = pipelineState_;
-	rootSignature = rootSignature_;
-	srvHeap = modelShareVaria.srvHeap;
-};
 
 void ModelCone::Initialize(ModelShareVaria& modelShareVaria)
 {
@@ -451,7 +475,7 @@ void ModelCone::Initialize(ModelShareVaria& modelShareVaria)
 
 }
 
-const std::vector<PosUvColor> ModelCone::GetVertices()
+const std::vector<PosNormalUv> ModelCone::GetVertices()
 {
 	return vertices;
 }

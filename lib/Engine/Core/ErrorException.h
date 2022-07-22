@@ -19,18 +19,18 @@
 #include<DirectXMath.h>
 #include<DirectXTex.h>
 #include<dxgi1_6.h>
+#include<dxgidebug.h>
+#include<filesystem>
+#include<forward_list>
 #include<fstream>
 #include<iterator>
 #include<memory>
+#include<mmsystem.h>
 #include<sstream>
 #include<string>
+#include<tchar.h>
+#include<unordered_map>
 #include<vector>
 #include<Windows.h>
 #include<wrl.h>
-#include<dinput.h>
-#include<filesystem>
-#include<forward_list>
-#include<dxgidebug.h>
-#include <tchar.h>
-#include <mmsystem.h>
 #pragma warning(pop)

@@ -28,9 +28,9 @@ void Mouse::Update()
 	GetCursorPos(&p);
 	ScreenToClient(FindWindowA("DirectXGame", nullptr), &p);
 	mousePos.x = static_cast<float>(p.x);
-	mousePos.x = MyMath::Clamp(0.0f, static_cast<float>(WindowsApp::GetInstance()->GetWindowWidth()), mousePos.x);
+	mousePos.x = MyMath::Clamp(mousePos.x, 0.0f, static_cast<float>(WindowsApp::GetInstance()->GetWindowWidth()));
 	mousePos.y = static_cast<float>(p.y);
-	mousePos.y = MyMath::Clamp(0.0f, static_cast<float>(WindowsApp::GetInstance()->GetWindowHeight()), mousePos.y);
+	mousePos.y = MyMath::Clamp(mousePos.y, 0.0f, static_cast<float>(WindowsApp::GetInstance()->GetWindowHeight()));
 }
 
 bool Mouse::MouseButtonTrigger(MouseButton button)

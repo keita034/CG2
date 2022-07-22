@@ -8,13 +8,13 @@ objModel::~objModel()
 {
 }
 
-void objModel::Create(const char* filePath)
+void objModel::Create(const char* filePath,bool smoothing)
 {
 	std::vector<std::string> files;
 	files = MyMath::getFileNames(filePath);
 	std::string fileName;
 
-	for (std::string file: files)
+	for (std::string file : files)
 	{
 		if (file.find("obj") != std::string::npos)
 		{
@@ -39,7 +39,7 @@ void objModel::Create(const char* filePath)
 	//テクスチャUV
 	std::vector<MyMath::Vector2> texcoords;
 
-	PosUvColor tmp = { {},{},{},{0.0f,1.0,1.0f,1.0f} };
+	PosNormalUv tmp = { {},{},{} };
 
 	//1行ずつ読み込む
 	std::string line;
@@ -59,7 +59,7 @@ void objModel::Create(const char* filePath)
 			std::string filename;
 			line_stream >> filename;
 			//マテリアル読み込み
-			LoadMaterial(filePath,filename);
+			LoadMaterial(filePath, filename);
 
 		}
 		//先頭文字列がVなら頂点座標
@@ -120,14 +120,25 @@ void objModel::Create(const char* filePath)
 				tmp.uv = texcoords[static_cast<std::vector<MyMath::Vector2, std::allocator<MyMath::Vector2>>::size_type>(indexTexcoord) - 1];
 				vertices.push_back(tmp);
 
+				if (smoothing)
+				{
+					smoothData[indexPosition].emplace_back(static_cast<size_t>(vertices.size()-1));
+				}
+
 				//インデックスデータの追加
 				indices.emplace_back(static_cast<uint16_t>(indices.size()));
+
 			}
 		}
 	}
 
 	//ファイルを閉じる
 	file.close();
+
+	if (smoothing)
+	{
+		CalculateSmoothedVertexNormals();
+	}
 
 	maxVert = static_cast<UINT>(vertices.size());
 	maxIndex = static_cast<UINT>(indices.size());
@@ -183,13 +194,8 @@ void objModel::SetTexture(const wchar_t* filePath)
 	CreateShaderResourceView();
 }
 
-void objModel::Update(const MyMath::Vector3& pos, const MyMath::Vector3& rot, const MyMath::Vector3& scale, const MyMath::Vector4& color)
+void objModel::Update(const MyMath::Vector3& pos, const MyMath::Vector3& rot, const MyMath::Vector3& scale)
 {
-	//カラー
-	for (int i = 0; i < 4; i++)
-	{
-		vertMap[i].color = color;
-	}
 
 	MyMath::Matrix4 mTrans, mRot, mScale;
 	//平行移動行列
@@ -205,8 +211,9 @@ void objModel::Update(const MyMath::Vector3& pos, const MyMath::Vector3& rot, co
 void objModel::Draw(Camera* camera)
 {
 	assert(camera);
-
-	constMapTransform->mat = matWorld * camera->GetViewMatrixInv() * camera->GetProjectionMatrix();
+	constMapTransform->matWorld = matWorld * camera->GetViewMatrixInv() * camera->GetProjectionMatrix();
+	constMapTransform->world = matWorld;
+	constMapTransform->cameraPos = camera->GetPosition();
 
 	// パイプラインステートとルートシグネチャの設定コマンド
 	cmdList->SetPipelineState(pipelineState.Get());
@@ -224,6 +231,7 @@ void objModel::Draw(Camera* camera)
 	// 定数バッファビュー(CBV)の設定コマンド
 	cmdList->SetGraphicsRootConstantBufferView(0, constBuffTransform->GetGPUVirtualAddress());
 	cmdList->SetGraphicsRootConstantBufferView(1, constBuffMaterial->GetGPUVirtualAddress());
+	light->SetConstBufferView(cmdList.Get(), 3);
 
 	// SRVヒープの設定コマンド
 	cmdList->SetDescriptorHeaps(1, srvHeap.GetAddressOf());
@@ -246,6 +254,32 @@ const std::vector<uint16_t> objModel::GetIndices()
 	return indices;
 }
 
+void objModel::SetShading(ShaderType type)
+{
+	ModelPipeLine* pipeline = ModelPipeLine::GetInstance();
+	switch (type)
+	{
+	case Default:
+		pipelineState = pipeline->GetDefaultPipeline()->pipelineState;
+		rootSignature = pipeline->GetDefaultPipeline()->rootSignature;
+		break;
+	case Flat:
+		break;
+	case Gouraud:
+		break;
+	case Lambert:
+		pipelineState = pipeline->GetLambertPipeline()->pipelineState;
+		rootSignature = pipeline->GetLambertPipeline()->rootSignature;
+		break;
+	case Phong:
+		pipelineState = pipeline->GetPhongPipeline()->pipelineState;
+		rootSignature = pipeline->GetPhongPipeline()->rootSignature;
+		break;
+	default:
+		break;
+	}
+}
+
 void objModel::LoadMaterial(const std::string& directoryPath, const std::string& filename)
 {
 	std::ifstream file;
@@ -259,7 +293,7 @@ void objModel::LoadMaterial(const std::string& directoryPath, const std::string&
 	}
 
 	std::string line;
-	while (std::getline(file,line))
+	while (std::getline(file, line))
 	{
 		//1行分の文字列をストリームに変換して解析しやすくする
 		std::istringstream line_stream(line);
@@ -343,7 +377,7 @@ void objModel::CreateShaderResourceView()
 	srvDesc.Texture2D.MipLevels = static_cast<UINT>(metadata.mipLevels);
 
 	// ハンドルの指す位置にシェーダーリソースビュー作成
- 	device->CreateShaderResourceView(texBuff.Get(), &srvDesc, cpuHandle);
+	device->CreateShaderResourceView(texBuff.Get(), &srvDesc, cpuHandle);
 }
 
 void objModel::CreatVertexIndexBuffer()
@@ -354,7 +388,7 @@ void objModel::CreatVertexIndexBuffer()
 	D3D12_RESOURCE_DESC resDesc{};
 
 	// 頂点データ全体のサイズ = 頂点データ一つ分のサイズ * 頂点データの要素数
-	UINT sizeVB = static_cast<UINT>(sizeof(PosUvColor) * maxVert);
+	UINT sizeVB = static_cast<UINT>(sizeof(PosNormalUv) * maxVert);
 
 	// 頂点バッファの設定
 	heapProp.Type = D3D12_HEAP_TYPE_UPLOAD; // GPUへの転送用
@@ -387,7 +421,7 @@ void objModel::CreatVertexIndexBuffer()
 	// 頂点バッファのサイズ
 	vbView.SizeInBytes = sizeVB;
 	// 頂点１つ分のデータサイズ
-	vbView.StrideInBytes = sizeof(PosUvColor);
+	vbView.StrideInBytes = sizeof(PosNormalUv);
 
 	// インデックスデータのサイズ
 	UINT sizeIB = static_cast<UINT>(sizeof(uint16_t) * maxIndex);
@@ -480,19 +514,32 @@ void objModel::Initialize(ModelShareVaria& modelShareVaria)
 
 }
 
-void objModel::Initialize(ModelShareVaria& modelShareVaria, ID3D12PipelineState* pipelineState_, ID3D12RootSignature* rootSignature_)
+void objModel::CalculateSmoothedVertexNormals()
 {
-	device = DirectX12Core::GetInstance()->GetDevice();
-	cmdList = DirectX12Core::GetInstance()->GetCommandList();
+	auto itr = smoothData.begin();
+	for (;itr != smoothData.end(); itr++)
+	{
+		//各面用の共通点コレクション
+		std::vector<uint16_t>& v = itr->second;
+		//全頂点の法線を平均する
+		MyMath::Vector3 normal = {};
+		for (uint16_t index : v)
+		{
+			normal += MyMath::Vector3{vertices[index].normal.x, vertices[index].normal.y, vertices[index].normal.z};
+		}
 
-	descriptorRange = modelShareVaria.descriptorRange;
-	nextIndex = modelShareVaria.nextIndex;
-	pipelineState = pipelineState_;
-	rootSignature = rootSignature_;
-	srvHeap = modelShareVaria.srvHeap;
+		normal = normal / static_cast<float>(v.size());
+		normal.normalization();
+		//共通法線を使用する全ての頂点データに書き込む
+		for (uint16_t index : v)
+		{
+			vertices[index].normal = { normal.x,normal.y,normal.z };
+		}
+
+	}
 }
 
-const std::vector<PosUvColor> objModel::GetVertices()
+const std::vector<PosNormalUv> objModel::GetVertices()
 {
 	return vertices;
 }

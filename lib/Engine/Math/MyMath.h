@@ -84,11 +84,18 @@ struct ConstBufferDataTransform
 	MyMath::Matrix4 mat;//3D変換行列
 };
 
-//座標・UV
-struct PosUvColor
+
+struct PosNormalUv
 {
 	MyMath::Vector3 pos;//座標
 	MyMath::Vector3 normal;//法線ベクトル
+	MyMath::Vector2 uv;//uv座標
+};
+
+//座標・UV・カラー
+struct PosUvColor
+{
+	MyMath::Vector3 pos;//座標
 	MyMath::Vector2 uv;//uv座標
 	MyMath::Vector4 color;//カラー
 };
@@ -106,3 +113,56 @@ typedef struct
 	//スプライト数
 	UINT nextIndex;
 }ModelShareVaria;
+
+//パイプライン・ルートシグネチャセット
+struct PipelineSet
+{
+	//パイプラインステート
+	Microsoft::WRL::ComPtr<ID3D12PipelineState> pipelineState;
+	//ルートシグネチャ
+	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature;
+};
+
+struct worldViewpojCamera
+{
+	//ワールド行列
+	MyMath::Matrix4 world;
+	//ワールド座標
+	MyMath::Matrix4 matWorld;
+	//カメラ座標(ワールド座標)
+	MyMath::Vector3 cameraPos;
+};
+
+//マテリアル
+struct Material
+{
+	//マテリアル名
+	std::string name;
+	//アンビエント影響度
+	MyMath::Vector3 ambient = { 0.3f, 0.3f, 0.3f };
+	//ディフューズ影響度
+	MyMath::Vector3 diffuse = { 0.8f,0.8f,0.8f };
+	//スペキュラー影響度
+	MyMath::Vector3 specular = { 0.5f,0.5f,0.5f };
+	//アルファ
+	float alpha = 1.0f;
+	//テクスチャファイル名
+	std::string textureFiename;
+};
+
+//マテリアルよう定数バッファ構造体
+struct ConstBuffDataMaterial
+{
+	//アンビエント係数
+	MyMath::Vector3 ambient;
+	//パディング
+	float pad1;
+	//ディフューズ係数
+	MyMath::Vector3 diffuse;
+	//パディング
+	float pad2;
+	//スペキュラー係数
+	MyMath::Vector3 specular;
+	//アルファ
+	float alpha;
+};
